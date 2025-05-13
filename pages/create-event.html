@@ -245,22 +245,41 @@
         // Populate department/org dropdowns
         if (user && user.role === 'student_leader') {
             // Student leader: only show their department/org
-            if (user.isDepartmentLeader && user.department) {
+            if (user.department) {
                 const deptSelect = document.getElementById('event-department');
-                deptSelect.innerHTML = `<option value="${user.department._id || user.department}">${user.department.name || user.department}</option>`;
+                const deptName = typeof user.department === 'object' ? user.department.name : user.department;
+                const deptId = typeof user.department === 'object' ? user.department._id : user.department;
+                
+                deptSelect.innerHTML = `<option value="${deptId}">${deptName}</option>`;
                 deptSelect.disabled = true;
+                
+                // Automatically select department category and show department field
+                const categorySelect = document.getElementById('event-category');
+                categorySelect.value = 'department';
+                document.getElementById('department-select-container').classList.remove('hidden');
+                categorySelect.disabled = true; // Prevent changing category
             }
-            if (user.isOrganizationLeader && user.organization) {
+            
+            if (user.organization) {
                 const orgSelect = document.getElementById('event-organization');
-                orgSelect.innerHTML = `<option value="${user.organization._id || user.organization}">${user.organization.name || user.organization}</option>`;
+                const orgName = typeof user.organization === 'object' ? user.organization.name : user.organization;
+                const orgId = typeof user.organization === 'object' ? user.organization._id : user.organization;
+                
+                orgSelect.innerHTML = `<option value="${orgId}">${orgName}</option>`;
                 orgSelect.disabled = true;
             }
         } else if (user && user.role === 'faculty') {
             // Faculty: only show their department
             if (user.department) {
                 const deptSelect = document.getElementById('event-department');
-                deptSelect.innerHTML = `<option value="${user.department._id || user.department}">${user.department.name || user.department}</option>`;
+                const deptName = typeof user.department === 'object' ? user.department.name : user.department;
+                const deptId = typeof user.department === 'object' ? user.department._id : user.department;
+                
+                deptSelect.innerHTML = `<option value="${deptId}">${deptName}</option>`;
                 deptSelect.disabled = true;
+                
+                // Show department field by default for faculty
+                document.getElementById('department-select-container').classList.remove('hidden');
             }
             // Organization dropdown remains unrestricted for faculty
             await populateDropdown('/api/events/organizations/all', 'event-organization');

@@ -2,61 +2,137 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Login | UniversityHub</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
     <link rel="stylesheet" href="../css/style.css">
 </head>
-<body class="bg-gray-50 flex items-center justify-center min-h-screen">
-    <div class="bg-white rounded-lg shadow-lg p-8 w-full max-w-md">
-        <h1 class="text-2xl font-bold text-gray-800 mb-6 text-center">Login</h1>
+<body class="bg-gray-50 flex items-center justify-center min-h-screen px-4">
+    <div class="bg-white rounded-lg shadow-lg p-6 sm:p-8 w-full max-w-md mx-auto">
+        <div class="flex justify-center mb-6">
+            <img src="../assets/logo.png" alt="UniversityHub Logo" class="h-12 w-auto">
+        </div>
+        <h1 class="text-xl sm:text-2xl font-bold text-gray-800 mb-6 text-center">Welcome Back</h1>
         <form id="login-form" class="space-y-4">
             <div>
                 <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                <input type="email" id="email" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" required>
+                <input type="email" 
+                       id="email" 
+                       class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" 
+                       required
+                       autocomplete="email"
+                       inputmode="email">
             </div>
             <div>
                 <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Password</label>
-                <input type="password" id="password" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" required>
+                <div class="relative">
+                    <input type="password" 
+                           id="password" 
+                           class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" 
+                           required
+                           autocomplete="current-password">
+                    <button type="button" 
+                            id="toggle-password" 
+                            class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                            aria-label="Toggle password visibility">
+                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                        </svg>
+                    </button>
+                </div>
             </div>
-            <button type="submit" class="btn btn-primary w-full">Login</button>
+            <button type="submit" class="btn btn-primary w-full py-3 text-base font-medium">
+                <span id="login-text">Login</span>
+                <div id="login-spinner" class="loading-spinner hidden"></div>
+            </button>
         </form>
-        <div class="mt-4 text-center">
+        <div class="mt-6 text-center space-y-2">
             <p class="text-sm text-gray-600">Don't have an account?</p>
-            <a href="/register.html" class="mt-2 inline-block text-indigo-600 hover:text-indigo-800 font-medium transition-colors duration-200 ease-in-out">Register Now</a>
+            <a href="/register.html" class="block w-full sm:inline-block sm:w-auto text-center px-4 py-2 text-indigo-600 hover:text-indigo-800 font-medium transition-colors duration-200 ease-in-out">Register Now</a>
         </div>
-        <div id="login-message" class="mt-4 text-center text-red-600"></div>
+        <div id="login-message" class="mt-4 text-center text-red-600 text-sm"></div>
     </div>
     <script src="../js/utils.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             setPageTitle('Login');
+            
+            // Password visibility toggle
+            const togglePassword = document.getElementById('toggle-password');
+            const passwordInput = document.getElementById('password');
+            
+            togglePassword.addEventListener('click', function() {
+                const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                passwordInput.setAttribute('type', type);
+                
+                // Update icon based on password visibility
+                const svg = this.querySelector('svg');
+                if (type === 'password') {
+                    svg.innerHTML = `
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                    `;
+                } else {
+                    svg.innerHTML = `
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                    `;
+                }
+            });
         });
-    </script>
-    <script>
-    document.getElementById('login-form').addEventListener('submit', async function(e) {
-        e.preventDefault();
-        const email = document.getElementById('email').value;
-        const password = document.getElementById('password').value;
-        const res = await fetch('/api/auth/login', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email, password })
+        
+        // Form submission with loading state
+        document.getElementById('login-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const loginText = document.getElementById('login-text');
+            const loginSpinner = document.getElementById('login-spinner');
+            const submitButton = this.querySelector('button[type="submit"]');
+            
+            // Disable form submission and show loading state
+            submitButton.disabled = true;
+            loginText.classList.add('hidden');
+            loginSpinner.classList.remove('hidden');
+            
+            try {
+                const email = document.getElementById('email').value;
+                const password = document.getElementById('password').value;
+                const res = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+                
+                const msgDiv = document.getElementById('login-message');
+                if (res.ok) {
+                    const data = await res.json();
+                    localStorage.setItem('token', data.token);
+                    localStorage.setItem('userRole', data.user.role);
+                    msgDiv.textContent = 'Login successful! Redirecting...';
+                    msgDiv.className = 'mt-4 text-center text-green-600 text-sm';
+                    setTimeout(() => {
+                        window.location.href = '/index.html#dashboard';
+                    }, 1000);
+                } else {
+                    const err = await res.json();
+                    msgDiv.textContent = err.message || 'Login failed. Please try again.';
+                    msgDiv.className = 'mt-4 text-center text-red-600 text-sm';
+                    
+                    // Reset button state
+                    submitButton.disabled = false;
+                    loginText.classList.remove('hidden');
+                    loginSpinner.classList.add('hidden');
+                }
+            } catch (error) {
+                const msgDiv = document.getElementById('login-message');
+                msgDiv.textContent = 'Network error. Please check your connection and try again.';
+                msgDiv.className = 'mt-4 text-center text-red-600 text-sm';
+                
+                // Reset button state
+                submitButton.disabled = false;
+                loginText.classList.remove('hidden');
+                loginSpinner.classList.add('hidden');
+            }
         });
-        const msgDiv = document.getElementById('login-message');
-        if (res.ok) {
-            const data = await res.json();
-            localStorage.setItem('token', data.token);
-            localStorage.setItem('userRole', data.user.role);
-            msgDiv.textContent = 'Login successful! Redirecting...';
-            setTimeout(() => {
-                window.location.href = '/';
-            }, 1000);
-        } else {
-            const err = await res.json();
-            msgDiv.textContent = err.message || 'Login failed. Please try again.';
-        }
-    });
     </script>
 </body>
 </html> 

@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>UniversityHub</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
     <link rel="stylesheet" href="../css/style.css">
@@ -20,6 +20,10 @@
         .zoom-link {
             color: #374151;
             transition: all 0.2s;
+            min-height: 44px; /* Minimum touch target size */
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1rem;
         }
         .zoom-link:hover, .zoom-link.active {
             background-color: #e5e7eb;
@@ -27,6 +31,7 @@
         }
         .zoom-link i {
             color: #6b7280;
+            font-size: 1.25rem; /* Larger icons for better touch targets */
         }
         .zoom-link:hover i, .zoom-link.active i {
             color: #4f46e5;
@@ -35,9 +40,86 @@
             background-color: #4f46e5;
             color: white;
             transition: all 0.2s;
+            min-height: 44px;
+            padding: 0.75rem 1rem;
+            font-size: 1rem;
         }
         .create-event-btn:hover {
             background-color: #4338ca;
+        }
+        
+        /* Mobile-specific styles */
+        .mobile-menu {
+            transition: transform 0.3s ease-in-out;
+            width: 85%; /* Wider menu for better usability */
+            max-width: 320px;
+        }
+        
+        .mobile-menu-overlay {
+            transition: opacity 0.3s ease-in-out;
+        }
+        
+        /* Bottom navigation bar for mobile */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            border-top: 1px solid #e5e7eb;
+            display: flex;
+            justify-content: space-around;
+            padding: 0.5rem;
+            z-index: 40;
+        }
+        
+        .bottom-nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 0.5rem;
+            color: #6b7280;
+            font-size: 0.75rem;
+            min-width: 60px;
+        }
+        
+        .bottom-nav-item i {
+            font-size: 1.25rem;
+            margin-bottom: 0.25rem;
+        }
+        
+        .bottom-nav-item.active {
+            color: #4f46e5;
+        }
+        
+        /* Adjust main content padding for bottom navigation */
+        @media (max-width: 768px) {
+            main {
+                padding-bottom: 4rem !important;
+            }
+            
+            .mobile-menu nav {
+                height: calc(100vh - 60px);
+                overflow-y: auto;
+            }
+        }
+        
+        /* Enhanced touch targets for mobile */
+        @media (max-width: 768px) {
+            .zoom-link {
+                padding: 1rem;
+                margin: 0.25rem 0;
+            }
+            
+            .mobile-menu-button, .close-menu-button {
+                padding: 0.75rem;
+                font-size: 1.5rem;
+            }
+        }
+        
+        /* Smooth scrolling for mobile */
+        * {
+            -webkit-overflow-scrolling: touch;
         }
     </style>
 </head>
@@ -132,8 +214,13 @@
         <!-- Mobile Header -->
         <div class="flex flex-col flex-1 overflow-hidden">
             <div class="md:hidden flex items-center justify-between zoom-header px-4 py-3">
-                <a href="#" class="text-xl font-semibold text-gray-800">UniversityHub</a>
-                <button type="button" class="mobile-menu-button p-2 rounded-md hover:bg-gray-100 focus:outline-none">
+                <div class="flex items-center space-x-2">
+                    <img src="../assets/images/university-hub-logo.png" alt="UniversityHub Logo" class="h-8 w-auto">
+                    <span class="text-xl font-semibold text-gray-800">UniversityHub</span>
+                </div>
+                <button type="button" 
+                        class="mobile-menu-button p-3 rounded-md hover:bg-gray-100 focus:outline-none"
+                        aria-label="Open menu">
                     <i class="fas fa-bars text-gray-600"></i>
                 </button>
             </div>
@@ -142,99 +229,185 @@
             <main class="flex-1 overflow-y-auto bg-gray-50 p-4">
                 <iframe id="content-frame" class="w-full h-full border-none" src="dashboard.html"></iframe>
             </main>
+
+            <!-- Bottom Navigation for Mobile -->
+            <div class="md:hidden bottom-nav">
+                <a href="dashboard.html" class="bottom-nav-item active">
+                    <i class="fas fa-th-large"></i>
+                    <span>Home</span>
+                </a>
+                <a href="event-list.html" class="bottom-nav-item">
+                    <i class="fas fa-calendar-alt"></i>
+                    <span>Events</span>
+                </a>
+                <a href="create-event.html" class="bottom-nav-item">
+                    <i class="fas fa-plus-circle"></i>
+                    <span>Create</span>
+                </a>
+                <a href="notifications.html" class="bottom-nav-item">
+                    <i class="fas fa-bell"></i>
+                    <span>Alerts</span>
+                </a>
+                <a href="profile.html" class="bottom-nav-item">
+                    <i class="fas fa-user"></i>
+                    <span>Profile</span>
+                </a>
+            </div>
         </div>
     </div>
 
     <!-- Mobile Menu (Hidden by default) -->
     <div class="md:hidden fixed inset-0 bg-gray-600 bg-opacity-75 z-50 hidden mobile-menu-overlay">
-        <div class="absolute top-0 right-0 h-full w-64 bg-white shadow-xl transform translate-x-full transition-transform mobile-menu">
+        <div class="absolute top-0 right-0 h-full w-64 bg-white shadow-xl transform translate-x-full transition-transform duration-300 ease-in-out mobile-menu">
             <div class="flex items-center justify-between px-4 py-3 zoom-header">
-                <span class="text-xl font-semibold text-gray-800">UniversityHub</span>
-                <button type="button" class="close-menu-button p-2 rounded-md hover:bg-gray-100 focus:outline-none">
+                <div class="flex items-center space-x-2">
+                    <img src="../assets/images/university-hub-logo.png" alt="UniversityHub Logo" class="h-8 w-auto">
+                    <span class="text-xl font-semibold text-gray-800">Menu</span>
+                </div>
+                <button type="button" 
+                        class="close-menu-button p-3 rounded-md hover:bg-gray-100 focus:outline-none"
+                        aria-label="Close menu">
                     <i class="fas fa-times text-gray-600"></i>
                 </button>
             </div>
+            
             <!-- Mobile Navigation -->
-            <nav class="mt-5 px-4">
-                <div class="mb-4">
-                    <a href="create-event.html" id="mobile-create-event-link"
-                        class="create-event-btn flex items-center justify-center px-4 py-2 rounded-lg text-sm font-medium w-full">
-                        <i class="fas fa-plus mr-2"></i>
-                        Create Event
-                    </a>
+            <nav class="mt-2 px-2 overflow-y-auto">
+                <!-- User Profile Section at Top -->
+                <div class="px-4 py-3 mb-4 border-b border-gray-200">
+                    <div class="flex items-center">
+                        <img id="mobile-profile-pic" class="h-10 w-10 rounded-full" src="assets/images/user.png" alt="User profile">
+                        <div class="ml-3">
+                            <p id="mobile-username" class="text-sm font-medium text-gray-700">User</p>
+                            <p id="mobile-role" class="text-xs text-gray-500">Role</p>
+                        </div>
+                    </div>
                 </div>
-                <div class="space-y-1">
-                    <!-- Mobile menu items with same zoom-link styling -->
-                    <a href="dashboard.html" class="zoom-link block px-4 py-2 text-sm rounded-lg">
-                        <i class="fas fa-th-large w-5"></i>
+
+                <div class="space-y-2">
+                    <a href="dashboard.html" class="zoom-link rounded-lg">
+                        <i class="fas fa-th-large w-6"></i>
                         <span class="ml-3">Dashboard</span>
                     </a>
-                    <!-- Add other mobile menu items following the same pattern -->
+                    <a href="event-list.html" class="zoom-link rounded-lg">
+                        <i class="fas fa-calendar-alt w-6"></i>
+                        <span class="ml-3">My Events</span>
+                    </a>
+                    <a href="qr-check-in.html" class="zoom-link rounded-lg">
+                        <i class="fas fa-qrcode w-6"></i>
+                        <span class="ml-3">Event Check-In</span>
+                    </a>
+                    <a href="notifications.html" class="zoom-link rounded-lg">
+                        <i class="fas fa-bell w-6"></i>
+                        <span class="ml-3">Notifications</span>
+                    </a>
+                    <a href="approve-events.html" id="mobile-approve-events-link" class="zoom-link rounded-lg">
+                        <i class="fas fa-check-circle w-6"></i>
+                        <span class="ml-3">Approve Events</span>
+                    </a>
+                    <a href="admin-management.html" id="mobile-admin-management-link" class="zoom-link rounded-lg">
+                        <i class="fas fa-tasks w-6"></i>
+                        <span class="ml-3">Admin Management</span>
+                    </a>
+                </div>
+
+                <!-- Settings Section -->
+                <div class="mt-6 pt-6 border-t border-gray-200">
+                    <a href="profile.html" class="zoom-link rounded-lg">
+                        <i class="fas fa-user-cog w-6"></i>
+                        <span class="ml-3">Settings</span>
+                    </a>
+                    <a href="#" onclick="logout()" class="zoom-link rounded-lg">
+                        <i class="fas fa-sign-out-alt w-6"></i>
+                        <span class="ml-3">Logout</span>
+                    </a>
                 </div>
             </nav>
         </div>
     </div>
 
     <script>
-        // Mobile menu toggle
-        document.querySelector('.mobile-menu-button').addEventListener('click', function () {
-            document.querySelector('.mobile-menu-overlay').classList.remove('hidden');
-            document.querySelector('.mobile-menu').classList.remove('translate-x-full');
-            document.querySelector('.mobile-menu').classList.add('translate-x-0');
-        });
-
-        document.querySelector('.close-menu-button').addEventListener('click', function () {
-            document.querySelector('.mobile-menu').classList.remove('translate-x-0');
-            document.querySelector('.mobile-menu').classList.add('translate-x-full');
-            setTimeout(function () {
-                document.querySelector('.mobile-menu-overlay').classList.add('hidden');
+        // Mobile menu toggle with improved touch handling
+        const mobileMenu = document.querySelector('.mobile-menu');
+        const mobileMenuOverlay = document.querySelector('.mobile-menu-overlay');
+        
+        function openMobileMenu() {
+            mobileMenuOverlay.classList.remove('hidden');
+            // Force a reflow before adding the transform
+            mobileMenu.offsetHeight;
+            mobileMenu.classList.remove('translate-x-full');
+            mobileMenu.classList.add('translate-x-0');
+            document.body.style.overflow = 'hidden'; // Prevent background scrolling
+        }
+        
+        function closeMobileMenu() {
+            mobileMenu.classList.remove('translate-x-0');
+            mobileMenu.classList.add('translate-x-full');
+            setTimeout(() => {
+                mobileMenuOverlay.classList.add('hidden');
+                document.body.style.overflow = ''; // Restore scrolling
             }, 300);
+        }
+
+        document.querySelector('.mobile-menu-button').addEventListener('click', openMobileMenu);
+        document.querySelector('.close-menu-button').addEventListener('click', closeMobileMenu);
+        
+        // Close menu when clicking overlay
+        mobileMenuOverlay.addEventListener('click', (e) => {
+            if (e.target === mobileMenuOverlay) {
+                closeMobileMenu();
+            }
         });
 
-        // Handle mobile menu links
-        document.querySelectorAll('.mobile-link').forEach(link => {
-            link.addEventListener('click', function (e) {
+        // Bottom navigation handling
+        const bottomNavItems = document.querySelectorAll('.bottom-nav-item');
+        bottomNavItems.forEach(item => {
+            item.addEventListener('click', function(e) {
+                e.preventDefault();
+                bottomNavItems.forEach(i => i.classList.remove('active'));
+                this.classList.add('active');
+                const frame = document.getElementById('content-frame');
+                if (frame) {
+                    frame.src = this.getAttribute('href');
+                }
+            });
+        });
+
+        // Handle mobile menu links with improved touch handling
+        document.querySelectorAll('.mobile-menu .zoom-link').forEach(link => {
+            link.addEventListener('click', function(e) {
                 e.preventDefault();
                 const frame = document.getElementById('content-frame');
                 if (frame) {
                     frame.src = this.getAttribute('href');
                 }
-                document.querySelector('.mobile-menu').classList.remove('translate-x-0');
-                document.querySelector('.mobile-menu').classList.add('translate-x-full');
-                setTimeout(function () {
-                    document.querySelector('.mobile-menu-overlay').classList.add('hidden');
-                }, 300);
+                closeMobileMenu();
+                
+                // Update bottom nav active state if applicable
+                const bottomNavItem = document.querySelector(`.bottom-nav-item[href="${this.getAttribute('href')}"]`);
+                if (bottomNavItem) {
+                    bottomNavItems.forEach(i => i.classList.remove('active'));
+                    bottomNavItem.classList.add('active');
+                }
             });
         });
 
-        // Handle desktop sidebar links
-        document.querySelectorAll('nav a').forEach(link => {
-            if (!link.classList.contains('mobile-link')) {
-                link.addEventListener('click', function (e) {
-                    e.preventDefault();
-                    const frame = document.getElementById('content-frame');
-                    if (frame) {
-                        frame.src = this.getAttribute('href');
-                    }
-                    document.querySelectorAll('nav a').forEach(l => {
-                        if (!l.classList.contains('mobile-link')) {
-                            l.classList.remove('bg-indigo-700');
-                        }
-                    });
-                    this.classList.add('bg-indigo-700');
-                });
-            }
-        });
-
-        // Logout function
+        // Enhanced logout function with confirmation
         function logout() {
-            localStorage.removeItem('token');
-            window.location.href = 'login.html';
+            if (window.confirm('Are you sure you want to logout?')) {
+                localStorage.removeItem('token');
+                localStorage.removeItem('userRole');
+                window.location.href = 'login.html';
+            }
         }
 
-        // Check user role and update menu visibility
+        // Check user role and update menu visibility with error handling
         async function checkUserRole() {
             const token = localStorage.getItem('token');
+            if (!token) {
+                window.location.href = 'login.html';
+                return;
+            }
             
             try {
                 const res = await fetch('/api/auth/me', {
@@ -248,60 +421,103 @@
                     localStorage.setItem('userRole', user.role);
                     updateMenuVisibility(user.role);
                     updateUserInfo(user);
+                } else {
+                    // Token might be invalid
+                    localStorage.removeItem('token');
+                    window.location.href = 'login.html';
                 }
             } catch (error) {
                 console.error('Error checking user role:', error);
+                // Show error message to user
+                const errorMessage = document.createElement('div');
+                errorMessage.className = 'fixed bottom-16 left-4 right-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded';
+                errorMessage.innerHTML = 'Connection error. Please check your internet connection.';
+                document.body.appendChild(errorMessage);
+                setTimeout(() => errorMessage.remove(), 5000);
             }
         }
 
-        function updateUserInfo(user) {
-            document.getElementById('sidebar-username').textContent = user.username || user.fullName;
-            document.getElementById('sidebar-role').textContent = user.role.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase());
-            document.getElementById('sidebar-profile-pic').src = user.profilePic || 'assets/images/user.png';
-        }
-
-        function updateMenuVisibility(userRole) {
-            // Desktop menu elements
-            const createEventLink = document.getElementById('create-event-link');
-            const approveEventsLink = document.getElementById('approve-events-link');
-            const adminManagementLink = document.getElementById('admin-management-link');
+        // Update menu visibility based on user role
+        function updateMenuVisibility(role) {
+            const adminElements = [
+                document.getElementById('approve-events-link'),
+                document.getElementById('admin-management-link'),
+                document.getElementById('mobile-approve-events-link'),
+                document.getElementById('mobile-admin-management-link')
+            ];
             
-            // Mobile menu elements
-            const mobileCreateEventLink = document.getElementById('mobile-create-event-link');
-            const mobileApproveEventsLink = document.getElementById('mobile-approve-events-link');
-            const mobileAdminManagementLink = document.getElementById('mobile-admin-management-link');
-
-            if (userRole === 'admin') {
-                [createEventLink, approveEventsLink, adminManagementLink,
-                 mobileCreateEventLink, mobileApproveEventsLink, mobileAdminManagementLink]
-                .forEach(el => el && (el.style.display = ''));
-                return;
-            }
-
-            if (userRole === 'student') {
-                [createEventLink, mobileCreateEventLink]
-                .forEach(el => el && (el.style.display = 'none'));
-            }
-
-            if (userRole !== 'faculty') {
-                [approveEventsLink, mobileApproveEventsLink]
-                .forEach(el => el && (el.style.display = 'none'));
-            }
-
-            if (userRole !== 'admin') {
-                [adminManagementLink, mobileAdminManagementLink]
-                .forEach(el => el && (el.style.display = 'none'));
-            }
+            adminElements.forEach(element => {
+                if (element) {
+                    element.style.display = (role === 'admin' || role === 'superadmin') ? 'flex' : 'none';
+                }
+            });
         }
 
-        // Initialize when page loads
-        document.addEventListener('DOMContentLoaded', async () => {
-            const token = localStorage.getItem('token');
-            if (!token) {
-                window.location.href = 'login.html';
-                return;
-            }
-            await checkUserRole();
+        // Update user info in both sidebar and mobile menu
+        function updateUserInfo(user) {
+            // Update desktop sidebar
+            const sidebarUsername = document.getElementById('sidebar-username');
+            const sidebarRole = document.getElementById('sidebar-role');
+            const sidebarProfilePic = document.getElementById('sidebar-profile-pic');
+            
+            // Update mobile menu
+            const mobileUsername = document.getElementById('mobile-username');
+            const mobileRole = document.getElementById('mobile-role');
+            const mobileProfilePic = document.getElementById('mobile-profile-pic');
+            
+            if (sidebarUsername) sidebarUsername.textContent = user.username || user.fullName;
+            if (sidebarRole) sidebarRole.textContent = user.role.charAt(0).toUpperCase() + user.role.slice(1);
+            if (sidebarProfilePic && user.profilePicture) sidebarProfilePic.src = user.profilePicture;
+            
+            if (mobileUsername) mobileUsername.textContent = user.username || user.fullName;
+            if (mobileRole) mobileRole.textContent = user.role.charAt(0).toUpperCase() + user.role.slice(1);
+            if (mobileProfilePic && user.profilePicture) mobileProfilePic.src = user.profilePicture;
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', checkUserRole);
+
+        // Handle hash-based navigation
+        function handleNavigation() {
+            const contentFrame = document.getElementById('content-frame');
+            const hash = window.location.hash.slice(1) || 'dashboard';
+            contentFrame.src = hash + '.html';
+            
+            // Update active states in navigation
+            document.querySelectorAll('.zoom-link').forEach(link => {
+                if (link.getAttribute('href').includes(hash)) {
+                    link.classList.add('active');
+                } else {
+                    link.classList.remove('active');
+                }
+            });
+            
+            // Update bottom nav active state
+            document.querySelectorAll('.bottom-nav-item').forEach(item => {
+                if (item.getAttribute('href').includes(hash)) {
+                    item.classList.add('active');
+                } else {
+                    item.classList.remove('active');
+                }
+            });
+        }
+
+        // Listen for hash changes
+        window.addEventListener('hashchange', handleNavigation);
+        
+        // Initial navigation
+        document.addEventListener('DOMContentLoaded', () => {
+            handleNavigation();
+            
+            // Update navigation when clicking links
+            document.querySelectorAll('.zoom-link, .bottom-nav-item').forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const href = link.getAttribute('href');
+                    const page = href.replace('.html', '');
+                    window.location.hash = page;
+                });
+            });
         });
     </script>
 </body>

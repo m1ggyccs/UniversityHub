@@ -2,35 +2,69 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Register | UniversityHub</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
     <link rel="stylesheet" href="../css/style.css">
 </head>
-<body class="bg-gray-50 flex items-center justify-center min-h-screen">
-    <div class="bg-white rounded-lg shadow-lg p-8 w-full max-w-md">
-        <h1 class="text-2xl font-bold text-gray-800 mb-6 text-center">Register as Student</h1>
+<body class="bg-gray-50 flex items-center justify-center min-h-screen px-4 py-8">
+    <div class="bg-white rounded-lg shadow-lg p-6 sm:p-8 w-full max-w-md mx-auto">
+        <div class="flex justify-center mb-6">
+            <img src="../assets/logo.png" alt="UniversityHub Logo" class="h-12 w-auto">
+        </div>
+        <h1 class="text-xl sm:text-2xl font-bold text-gray-800 mb-6 text-center">Create Your Account</h1>
         <form id="register-form" class="space-y-4">
             <div>
                 <label for="username" class="block text-sm font-medium text-gray-700 mb-1">Username</label>
-                <input type="text" id="username" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" required>
+                <input type="text" 
+                       id="username" 
+                       class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" 
+                       required
+                       autocomplete="username">
             </div>
             <div>
                 <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                <input type="email" id="email" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" required>
+                <input type="email" 
+                       id="email" 
+                       class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" 
+                       required
+                       autocomplete="email"
+                       inputmode="email">
             </div>
             <div class="mb-4">
-                <label for="password" class="block text-gray-700">Password</label>
-                <input type="password" id="password" name="password" class="w-full px-3 py-2 border rounded focus:outline-none focus:ring focus:border-indigo-500" required>
+                <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                <div class="relative">
+                    <input type="password" 
+                           id="password" 
+                           name="password" 
+                           class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" 
+                           required
+                           autocomplete="new-password">
+                    <button type="button" 
+                            id="toggle-password" 
+                            class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                            aria-label="Toggle password visibility">
+                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                        </svg>
+                    </button>
+                </div>
                 <p class="text-xs text-gray-500 mt-1">Password must be at least 6 characters.</p>
             </div>
             <div>
                 <label for="fullName" class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
-                <input type="text" id="fullName" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" required>
+                <input type="text" 
+                       id="fullName" 
+                       class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" 
+                       required
+                       autocomplete="name">
             </div>
             <div>
                 <label for="department" class="block text-sm font-medium text-gray-700 mb-1">Department</label>
-                <select id="department" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" required>
+                <select id="department" 
+                        class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" 
+                        required>
                     <option value="">Select Department</option>
                 </select>
             </div>
@@ -40,11 +74,14 @@
                     <option value="">Select Organization</option>
                 </select>
             </div>
-            <button type="submit" class="btn btn-primary w-full">Register</button>
+            <button type="submit" class="btn btn-primary w-full py-3 text-base font-medium">
+                <span id="register-text">Create Account</span>
+                <div id="register-spinner" class="loading-spinner hidden"></div>
+            </button>
         </form>
-        <div id="register-message" class="mt-4 text-center text-red-600"></div>
-        <div class="mt-4 text-center">
-            <a href="login.html" class="text-indigo-600 underline">Already have an account? Login</a>
+        <div id="register-message" class="mt-4 text-center text-sm"></div>
+        <div class="mt-6 text-center">
+            <a href="login.html" class="text-indigo-600 hover:text-indigo-800 font-medium transition-colors duration-200 ease-in-out">Already have an account? Login</a>
         </div>
     </div>
     <script src="../js/utils.js"></script>
@@ -52,80 +89,134 @@
     // Load departments and organizations
     async function loadDepartments() {
         try {
+            const deptSelect = document.getElementById('department');
+            deptSelect.disabled = true;
             const res = await fetch('/api/departments');
             const departments = await res.json();
-            const deptSelect = document.getElementById('department');
             departments.forEach(dept => {
                 const option = document.createElement('option');
                 option.value = dept._id;
                 option.textContent = dept.name;
                 deptSelect.appendChild(option);
             });
+            deptSelect.disabled = false;
         } catch (error) {
             console.error('Error loading departments:', error);
+            const msgDiv = document.getElementById('register-message');
+            msgDiv.textContent = 'Error loading departments. Please refresh the page.';
+            msgDiv.className = 'mt-4 text-center text-red-600 text-sm';
         }
     }
 
     async function loadOrganizations() {
         try {
+            const orgSelect = document.getElementById('organization');
+            orgSelect.disabled = true;
             const res = await fetch('/api/organizations');
             const organizations = await res.json();
-            const orgSelect = document.getElementById('organization');
             organizations.forEach(org => {
                 const option = document.createElement('option');
                 option.value = org._id;
                 option.textContent = org.name;
                 orgSelect.appendChild(option);
             });
+            orgSelect.disabled = false;
         } catch (error) {
             console.error('Error loading organizations:', error);
+            const msgDiv = document.getElementById('register-message');
+            msgDiv.textContent = 'Error loading organizations. Please refresh the page.';
+            msgDiv.className = 'mt-4 text-center text-red-600 text-sm';
         }
     }
 
-    // Load data when page loads
+    // Password visibility toggle
     document.addEventListener('DOMContentLoaded', () => {
         setPageTitle('Register');
         loadDepartments();
         loadOrganizations();
+
+        const togglePassword = document.getElementById('toggle-password');
+        const passwordInput = document.getElementById('password');
+        
+        togglePassword.addEventListener('click', function() {
+            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordInput.setAttribute('type', type);
+            
+            const svg = this.querySelector('svg');
+            if (type === 'password') {
+                svg.innerHTML = `
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                `;
+            } else {
+                svg.innerHTML = `
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                `;
+            }
+        });
     });
 
     document.getElementById('register-form').addEventListener('submit', async function(e) {
         e.preventDefault();
         const msgDiv = document.getElementById('register-message');
+        const registerText = document.getElementById('register-text');
+        const registerSpinner = document.getElementById('register-spinner');
+        const submitButton = this.querySelector('button[type="submit"]');
+        
         msgDiv.textContent = '';
         const departmentValue = document.getElementById('department').value;
         if (!departmentValue) {
-            msgDiv.classList.remove('text-green-600');
-            msgDiv.classList.add('text-red-600');
+            msgDiv.className = 'mt-4 text-center text-red-600 text-sm';
             msgDiv.textContent = 'Please select a department.';
             return;
         }
-        const data = {
-            username: document.getElementById('username').value,
-            email: document.getElementById('email').value,
-            password: document.getElementById('password').value,
-            fullName: document.getElementById('fullName').value,
-            department: document.getElementById('department').value,
-            organization: document.getElementById('organization').value || undefined,
-            role: 'student' // Always register as student
-        };
-        const res = await fetch('/api/auth/register', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data)
-        });
-        if (res.ok) {
-            msgDiv.classList.remove('text-red-600');
-            msgDiv.classList.add('text-green-600');
-            msgDiv.textContent = 'Registration successful! Redirecting to login...';
-            setTimeout(() => {
-                window.location.href = 'login.html';
-            }, 1500);
-        } else {
-            const err = await res.json();
-            msgDiv.classList.remove('text-green-600');
-            msgDiv.classList.add('text-red-600');
-            msgDiv.textContent = err.message || 'Registration failed. Please try again.';
+
+        // Disable form submission and show loading state
+        submitButton.disabled = true;
+        registerText.classList.add('hidden');
+        registerSpinner.classList.remove('hidden');
+        
+        try {
+            const data = {
+                username: document.getElementById('username').value,
+                email: document.getElementById('email').value,
+                password: document.getElementById('password').value,
+                fullName: document.getElementById('fullName').value,
+                department: document.getElementById('department').value,
+                organization: document.getElementById('organization').value || undefined,
+                role: 'student' // Always register as student
+            };
+            
+            const res = await fetch('/api/auth/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            
+            if (res.ok) {
+                msgDiv.className = 'mt-4 text-center text-green-600 text-sm';
+                msgDiv.textContent = 'Registration successful! Redirecting to login...';
+                setTimeout(() => {
+                    window.location.href = 'login.html';
+                }, 1500);
+            } else {
+                const err = await res.json();
+                msgDiv.className = 'mt-4 text-center text-red-600 text-sm';
+                msgDiv.textContent = err.message || 'Registration failed. Please try again.';
+                
+                // Reset button state
+                submitButton.disabled = false;
+                registerText.classList.remove('hidden');
+                registerSpinner.classList.add('hidden');
+            }
+        } catch (error) {
+            msgDiv.className = 'mt-4 text-center text-red-600 text-sm';
+            msgDiv.textContent = 'Network error. Please check your connection and try again.';
+            
+            // Reset button state
+            submitButton.disabled = false;
+            registerText.classList.remove('hidden');
+            registerSpinner.classList.add('hidden');
         }
     });
     </script>

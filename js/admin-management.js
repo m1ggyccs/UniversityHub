@@ -514,14 +514,19 @@ async function saveUser(event) {
     
     const userId = document.getElementById('user-id').value;
     const organizationValue = document.getElementById('user-organization').value;
+    const role = document.getElementById('user-role').value;
+    const departmentValue = document.getElementById('user-department').value;
     
     const userData = {
         username: document.getElementById('user-username').value,
         fullName: document.getElementById('user-fullname').value,
         email: document.getElementById('user-email').value,
-        role: document.getElementById('user-role').value,
-        department: document.getElementById('user-department').value || null,
-        ...(organizationValue && organizationValue !== "None" ? { organization: organizationValue } : {})
+        role: role,
+        department: departmentValue || null,
+        ...(organizationValue && organizationValue !== "None" ? { organization: organizationValue } : {}),
+        // Set leadership flags based on role and assignments
+        isDepartmentLeader: role === 'student_leader' && departmentValue ? true : false,
+        isOrganizationLeader: role === 'student_leader' && organizationValue && organizationValue !== "None" ? true : false
     };
 
     try {

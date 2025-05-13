@@ -252,7 +252,9 @@ router.put('/:id', [
     body('email').optional().isEmail().normalizeEmail(),
     body('role').optional().isIn(['admin', 'faculty', 'student_leader', 'student']),
     body('department').optional().isMongoId().withMessage('Invalid department ID'),
-    body('organization').optional().isMongoId().withMessage('Invalid organization ID')
+    body('organization').optional().isMongoId().withMessage('Invalid organization ID'),
+    body('isDepartmentLeader').optional().isBoolean(),
+    body('isOrganizationLeader').optional().isBoolean()
 ], async (req, res) => {
     try {
         console.log('Update user request:', {
@@ -277,53 +279,48 @@ router.put('/:id', [
 
         // Build update object with only defined fields
         const updates = {};
-        const allowedUpdates = ['username', 'fullName', 'email', 'role', 'department', 'organization'];
+        const allowedUpdates = [
+            'username', 
+            'fullName', 
+            'email', 
+            'role', 
+            'department', 
+            'organization',
+            'isDepartmentLeader',
+            'isOrganizationLeader'
+        ];
+        
         allowedUpdates.forEach(field => {
             if (req.body[field] !== undefined && req.body[field] !== '') {
                 updates[field] = req.body[field];
             }
         });
 
+        // If role is changed from student_leader to something else, reset leadership flags
+        if (updates.role && updates.role !== 'student_leader') {
+            updates.isDepartmentLeader = false;
+            updates.isOrganizationLeader = false;
+        }
+
         console.log('Applying updates:', updates);
 
         // Handle empty strings for optional fields
         if (updates.department === '') delete updates.department;
-        if (updates.organization === '') delete updates.organization;
+        if (updates.organization === '') {
+            delete updates.organization;
+            updates.isOrganizationLeader = false;
+        }
 
-        const user = await User.findByIdAndUpdate(
+        const updatedUser = await User.findByIdAndUpdate(
             req.params.id,
-            { $set: updates },
-            { 
-                new: true, 
-                runValidators: true,
-                context: 'query'
-            }
-        ).select('-password');
+            updates,
+            { new: true, runValidators: true }
+        ).populate('department organization');
 
-        if (!user) {
-            return res.status(404).json({ message: 'User not found' });
-        }
-
-        console.log('Updated user:', user);
-        res.json(user);
+        res.json(updatedUser);
     } catch (error) {
-        console.error('Update user error:', error);
-        if (error.code === 11000) {
-            return res.status(400).json({ 
-                message: 'Username or email already exists',
-                error: error.message 
-            });
-        }
-        if (error.name === 'ValidationError') {
-            return res.status(400).json({ 
-                message: 'Validation error',
-                error: error.message 
-            });
-        }
-        res.status(500).json({ 
-            message: 'Server error', 
-            error: error.message 
-        });
+        console.error('Error updating user:', error);
+        res.status(500).json({ message: 'Server error', error: error.message });
     }
 });
 
