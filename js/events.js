@@ -44,6 +44,8 @@ function fetchEvents(category = '', date = '', filterType = 'all') {
       const now = new Date();
       const todayStr = now.toISOString().split('T')[0];
       let filteredEvents = events;
+      // Filter out pending events for everyone (frontend safety net)
+      filteredEvents = filteredEvents.filter(ev => ev.status !== 'pending');
       console.log('All events fetched:', events);
       if (filterType === 'upcoming') {
         filteredEvents = events.filter(ev => new Date(ev.date).toISOString().split('T')[0] > todayStr);

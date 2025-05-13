@@ -1,7 +1,7 @@
 {
-  "name": "school-event-management",
+  "name": "university-hub",
   "version": "1.0.0",
-  "description": "School Event Management System Backend",
+  "description": "UniversityHub - Event Management System Backend",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",

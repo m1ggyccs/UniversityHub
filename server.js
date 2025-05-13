@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const dotenv = require('dotenv');
 const path = require('path');
-const uri = "mongodb+srv://mamdavid:6Tb790Gl2k001bPM@universityhub.vm0vocq.mongodb.net/?retryWrites=true&w=majority&appName=universityhub";
+const uri = "mongodb+srv://mamdavid:03182526dave@universityhub.vm0vocq.mongodb.net/?retryWrites=true&w=majority&appName=universityhub";
 
 // Load environment variables
 dotenv.config();
@@ -53,4 +53,11 @@ app.listen(PORT, () => {
 
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'pages', 'index.html'));
+});
+
+process.on('uncaughtException', (err) => {
+  console.error('Uncaught Exception:', err);
+});
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('Unhandled Rejection:', reason);
 }); 

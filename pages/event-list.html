@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Event List - School Event Management</title>
+    <title>Events | UniversityHub</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
     <link rel="stylesheet" href="../css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
@@ -81,66 +81,70 @@
         </div>
     </div>
 
+    <script src="../js/utils.js"></script>
     <script>
-        // Simple toggle for filter buttons
-        document.querySelectorAll('.btn-secondary').forEach(button => {
-            button.addEventListener('click', function () {
-                // Remove active class from all buttons
-                document.querySelectorAll('.btn-secondary').forEach(btn => {
-                    btn.classList.remove('active-filter');
+        document.addEventListener('DOMContentLoaded', () => {
+            setPageTitle('Events');
+            // Simple toggle for filter buttons
+            document.querySelectorAll('.btn-secondary').forEach(button => {
+                button.addEventListener('click', function () {
+                    // Remove active class from all buttons
+                    document.querySelectorAll('.btn-secondary').forEach(btn => {
+                        btn.classList.remove('active-filter');
+                    });
+                    // Add active class to clicked button
+                    this.classList.add('active-filter');
                 });
-                // Add active class to clicked button
-                this.classList.add('active-filter');
+            });
+
+            // Render category tabs dynamically
+            fetch('http://localhost:3000/api/categories')
+              .then(res => res.json())
+              .then(categories => {
+                const nav = document.getElementById('category-tabs');
+                if (!nav) return;
+                nav.innerHTML = '';
+                // All Categories button
+                const allBtn = document.createElement('button');
+                allBtn.className = 'text-gray-600 whitespace-nowrap py-4 px-6 border-b-2 border-indigo-500 font-medium text-sm';
+                allBtn.textContent = 'All Categories';
+                allBtn.onclick = function() {
+                  document.querySelectorAll('#category-tabs button').forEach(b => b.classList.remove('border-indigo-500'));
+                  this.classList.add('border-indigo-500');
+                  fetchEvents();
+                };
+                nav.appendChild(allBtn);
+                // Static category buttons
+                const staticCategories = [
+                  { name: 'School', value: 'school' },
+                  { name: 'Department', value: 'department' },
+                  { name: 'Organization', value: 'organization' }
+                ];
+                staticCategories.forEach(cat => {
+                  const btn = document.createElement('button');
+                  btn.className = 'text-gray-600 whitespace-nowrap py-4 px-6 border-b-2 border-transparent hover:border-gray-300 font-medium text-sm';
+                  btn.textContent = cat.name;
+                  btn.onclick = function() {
+                    document.querySelectorAll('#category-tabs button').forEach(b => b.classList.remove('border-indigo-500'));
+                    this.classList.add('border-indigo-500');
+                    fetchEvents(cat.value);
+                  };
+                  nav.appendChild(btn);
+                    });
+                // Dynamic category buttons
+                categories.forEach((cat, idx) => {
+                  const btn = document.createElement('button');
+                  btn.className = 'text-gray-600 whitespace-nowrap py-4 px-6 border-b-2 border-transparent hover:border-gray-300 font-medium text-sm';
+                  btn.textContent = cat.name;
+                  btn.onclick = function() {
+                    document.querySelectorAll('#category-tabs button').forEach(b => b.classList.remove('border-indigo-500'));
+                    this.classList.add('border-indigo-500');
+                    fetchEvents(cat.name);
+                  };
+                  nav.appendChild(btn);
+                });
             });
         });
-
-        // Render category tabs dynamically
-        fetch('http://localhost:3000/api/categories')
-          .then(res => res.json())
-          .then(categories => {
-            const nav = document.getElementById('category-tabs');
-            if (!nav) return;
-            nav.innerHTML = '';
-            // All Categories button
-            const allBtn = document.createElement('button');
-            allBtn.className = 'text-gray-600 whitespace-nowrap py-4 px-6 border-b-2 border-indigo-500 font-medium text-sm';
-            allBtn.textContent = 'All Categories';
-            allBtn.onclick = function() {
-              document.querySelectorAll('#category-tabs button').forEach(b => b.classList.remove('border-indigo-500'));
-              this.classList.add('border-indigo-500');
-              fetchEvents();
-            };
-            nav.appendChild(allBtn);
-            // Static category buttons
-            const staticCategories = [
-              { name: 'School', value: 'school' },
-              { name: 'Department', value: 'department' },
-              { name: 'Organization', value: 'organization' }
-            ];
-            staticCategories.forEach(cat => {
-              const btn = document.createElement('button');
-              btn.className = 'text-gray-600 whitespace-nowrap py-4 px-6 border-b-2 border-transparent hover:border-gray-300 font-medium text-sm';
-              btn.textContent = cat.name;
-              btn.onclick = function() {
-                document.querySelectorAll('#category-tabs button').forEach(b => b.classList.remove('border-indigo-500'));
-                this.classList.add('border-indigo-500');
-                fetchEvents(cat.value);
-              };
-              nav.appendChild(btn);
-            });
-            // Dynamic category buttons
-            categories.forEach((cat, idx) => {
-              const btn = document.createElement('button');
-              btn.className = 'text-gray-600 whitespace-nowrap py-4 px-6 border-b-2 border-transparent hover:border-gray-300 font-medium text-sm';
-              btn.textContent = cat.name;
-              btn.onclick = function() {
-                document.querySelectorAll('#category-tabs button').forEach(b => b.classList.remove('border-indigo-500'));
-                this.classList.add('border-indigo-500');
-                fetchEvents(cat.name);
-              };
-              nav.appendChild(btn);
-            });
-          });
     </script>
     <script src="../js/events.js"></script>
 </body>

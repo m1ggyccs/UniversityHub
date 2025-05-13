@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - School Event Management</title>
+    <title>Login | UniversityHub</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
     <link rel="stylesheet" href="../css/style.css">
 </head>
@@ -23,6 +23,12 @@
         </form>
         <div id="login-message" class="mt-4 text-center text-red-600"></div>
     </div>
+    <script src="../js/utils.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            setPageTitle('Login');
+        });
+    </script>
     <script>
     document.getElementById('login-form').addEventListener('submit', async function(e) {
         e.preventDefault();
@@ -37,6 +43,7 @@
         if (res.ok) {
             const data = await res.json();
             localStorage.setItem('token', data.token);
+            localStorage.setItem('userRole', data.user.role);
             msgDiv.textContent = 'Login successful! Redirecting...';
             setTimeout(() => {
                 window.location.href = '/';

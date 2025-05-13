@@ -4,68 +4,124 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>School Event Management</title>
+    <title>UniversityHub</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="../css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        .zoom-sidebar {
+            background-color: #f8f9fa;
+            border-right: 1px solid #e5e7eb;
+        }
+        .zoom-header {
+            background-color: #ffffff;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        .zoom-link {
+            color: #374151;
+            transition: all 0.2s;
+        }
+        .zoom-link:hover, .zoom-link.active {
+            background-color: #e5e7eb;
+            color: #4f46e5;
+        }
+        .zoom-link i {
+            color: #6b7280;
+        }
+        .zoom-link:hover i, .zoom-link.active i {
+            color: #4f46e5;
+        }
+        .create-event-btn {
+            background-color: #4f46e5;
+            color: white;
+            transition: all 0.2s;
+        }
+        .create-event-btn:hover {
+            background-color: #4338ca;
+        }
+    </style>
 </head>
 
 <body class="bg-gray-50">
     <div class="flex h-screen overflow-hidden">
         <!-- Sidebar -->
         <div class="hidden md:flex md:flex-shrink-0">
-            <div class="flex flex-col w-64 bg-indigo-800 text-white">
-                <div class="flex items-center justify-center h-16 bg-indigo-900">
-                    <span class="text-xl font-semibold">Event Manager</span>
+            <div class="flex flex-col w-64 zoom-sidebar">
+                <!-- Logo Header -->
+                <div class="flex items-center justify-between h-16 px-4 zoom-header">
+                    <div class="flex items-center space-x-2">
+                        <img src="../assets/images/university-hub-logo.png" alt="UniversityHub Logo" class="h-8 w-auto">
+                        <span class="text-xl font-semibold text-gray-800">UniversityHub</span>
+                    </div>
                 </div>
-                <div class="flex flex-col flex-grow px-4 mt-5">
-                    <nav class="flex-1 space-y-2">
+
+                <!-- Create Event Button -->
+                <div class="px-4 py-4">
+                    <a href="create-event.html" id="create-event-link"
+                        class="create-event-btn flex items-center justify-center px-4 py-2 rounded-lg text-sm font-medium">
+                        <i class="fas fa-plus mr-2"></i>
+                        Create Event
+                    </a>
+                </div>
+
+                <!-- Navigation -->
+                <div class="flex flex-col flex-grow px-4 py-2">
+                    <nav class="flex-1 space-y-1">
                         <a href="dashboard.html"
-                            class="flex items-center px-4 py-3 text-sm rounded-lg hover:bg-indigo-700 bg-indigo-700">
-                            <i class="fas fa-th-large mr-3"></i>
-                            <span>Dashboard</span>
+                            class="zoom-link active flex items-center px-4 py-2 text-sm rounded-lg">
+                            <i class="fas fa-th-large w-5"></i>
+                            <span class="ml-3">Dashboard</span>
                         </a>
                         <a href="event-list.html"
-                            class="flex items-center px-4 py-3 text-sm rounded-lg hover:bg-indigo-700">
-                            <i class="fas fa-calendar-alt mr-3"></i>
-                            <span>Event List</span>
-                        </a>
-                        <a href="create-event.html"
-                            class="flex items-center px-4 py-3 text-sm rounded-lg hover:bg-indigo-700">
-                            <i class="fas fa-plus-circle mr-3"></i>
-                            <span>Create Event</span>
+                            class="zoom-link flex items-center px-4 py-2 text-sm rounded-lg">
+                            <i class="fas fa-calendar-alt w-5"></i>
+                            <span class="ml-3">My Events</span>
                         </a>
                         <a href="qr-check-in.html"
-                            class="flex items-center px-4 py-3 text-sm rounded-lg hover:bg-indigo-700">
-                            <i class="fas fa-qrcode mr-3"></i>
-                            <span>QR Check-In</span>
+                            class="zoom-link flex items-center px-4 py-2 text-sm rounded-lg">
+                            <i class="fas fa-qrcode w-5"></i>
+                            <span class="ml-3">Event Check-In</span>
                         </a>
                         <a href="notifications.html"
-                            class="flex items-center px-4 py-3 text-sm rounded-lg hover:bg-indigo-700">
-                            <i class="fas fa-bell mr-3"></i>
-                            <span>Notifications</span>
+                            class="zoom-link flex items-center px-4 py-2 text-sm rounded-lg">
+                            <i class="fas fa-bell w-5"></i>
+                            <span class="ml-3">Notifications</span>
                         </a>
-                        <a href="speech-tools.html"
-                            class="flex items-center px-4 py-3 text-sm rounded-lg hover:bg-indigo-700">
-                            <i class="fas fa-microphone mr-3"></i>
-                            <span>Speech Tools</span>
+                        <a href="approve-events.html" id="approve-events-link"
+                            class="zoom-link flex items-center px-4 py-2 text-sm rounded-lg">
+                            <i class="fas fa-check-circle w-5"></i>
+                            <span class="ml-3">Approve Events</span>
                         </a>
-                        <a href="admin-events.html"
-                            class="flex items-center px-4 py-3 text-sm rounded-lg hover:bg-indigo-700">
-                            <i class="fas fa-tasks mr-3"></i>
-                            <span>Manage Events</span>
+                        <a href="admin-management.html" id="admin-management-link"
+                            class="zoom-link flex items-center px-4 py-2 text-sm rounded-lg">
+                            <i class="fas fa-tasks w-5"></i>
+                            <span class="ml-3">Admin Management</span>
                         </a>
+
+                        <!-- Settings Section -->
+                        <div class="mt-6 pt-6 border-t border-gray-200">
+                            <a href="profile.html" id="profile-link"
+                                class="zoom-link flex items-center px-4 py-2 text-sm rounded-lg">
+                                <i class="fas fa-user w-5"></i>
+                                <span class="ml-3">Profile</span>
+                            </a>
+                            <a href="#" onclick="logout()" 
+                                class="zoom-link flex items-center px-4 py-2 text-sm rounded-lg">
+                                <i class="fas fa-sign-out-alt w-5"></i>
+                                <span class="ml-3">Logout</span>
+                            </a>
+                        </div>
                     </nav>
-                    <div class="mt-auto pb-4">
-                        <div class="flex items-center px-4 py-3">
+
+                    <!-- User Profile Section -->
+                    <div class="mt-auto pb-4 pt-4 border-t border-gray-200">
+                        <div class="flex items-center px-4 py-2">
                             <div class="flex-shrink-0">
-                                <img class="h-8 w-8 rounded-full" src="../assets/images/user.png" alt="User profile">
-
-
+                                <img id="sidebar-profile-pic" class="h-8 w-8 rounded-full" src="assets/images/user.png" alt="User profile">
                             </div>
                             <div class="ml-3">
-                                <p class="text-sm font-medium">Admin User</p>
-                                <p class="text-xs text-indigo-200">View Profile</p>
+                                <p id="sidebar-username" class="text-sm font-medium text-gray-700">User</p>
+                                <p id="sidebar-role" class="text-xs text-gray-500">Role</p>
                             </div>
                         </div>
                     </div>
@@ -75,10 +131,10 @@
 
         <!-- Mobile Header -->
         <div class="flex flex-col flex-1 overflow-hidden">
-            <div class="md:hidden flex items-center justify-between bg-indigo-800 px-4 py-3 text-white">
-                <a href="#" class="text-xl font-semibold">Event Manager</a>
-                <button type="button" class="mobile-menu-button p-1 focus:outline-none focus:bg-indigo-700">
-                    <i class="fas fa-bars"></i>
+            <div class="md:hidden flex items-center justify-between zoom-header px-4 py-3">
+                <a href="#" class="text-xl font-semibold text-gray-800">UniversityHub</a>
+                <button type="button" class="mobile-menu-button p-2 rounded-md hover:bg-gray-100 focus:outline-none">
+                    <i class="fas fa-bars text-gray-600"></i>
                 </button>
             </div>
 
@@ -90,51 +146,31 @@
     </div>
 
     <!-- Mobile Menu (Hidden by default) -->
-    <div class="md:hidden fixed inset-0 bg-gray-900 bg-opacity-50 z-50 hidden mobile-menu-overlay">
-        <div
-            class="absolute top-0 left-0 h-full w-64 bg-indigo-800 shadow-lg transform -translate-x-full transition-transform mobile-menu">
-            <div class="flex items-center justify-between px-4 py-3 bg-indigo-900">
-                <span class="text-white text-xl font-semibold">Event Manager</span>
-                <button type="button" class="close-menu-button text-white focus:outline-none">
-                    <i class="fas fa-times"></i>
+    <div class="md:hidden fixed inset-0 bg-gray-600 bg-opacity-75 z-50 hidden mobile-menu-overlay">
+        <div class="absolute top-0 right-0 h-full w-64 bg-white shadow-xl transform translate-x-full transition-transform mobile-menu">
+            <div class="flex items-center justify-between px-4 py-3 zoom-header">
+                <span class="text-xl font-semibold text-gray-800">UniversityHub</span>
+                <button type="button" class="close-menu-button p-2 rounded-md hover:bg-gray-100 focus:outline-none">
+                    <i class="fas fa-times text-gray-600"></i>
                 </button>
             </div>
-            <nav class="mt-5 px-2 space-y-2">
-                <a href="dashboard.html"
-                    class="mobile-link block text-white px-4 py-3 text-sm rounded-lg hover:bg-indigo-700 bg-indigo-700">
-                    <i class="fas fa-th-large mr-3"></i>
-                    <span>Dashboard</span>
-                </a>
-                <a href="event-list.html"
-                    class="mobile-link block text-white px-4 py-3 text-sm rounded-lg hover:bg-indigo-700">
-                    <i class="fas fa-calendar-alt mr-3"></i>
-                    <span>Event List</span>
-                </a>
-                <a href="create-event.html"
-                    class="mobile-link block text-white px-4 py-3 text-sm rounded-lg hover:bg-indigo-700">
-                    <i class="fas fa-plus-circle mr-3"></i>
-                    <span>Create Event</span>
-                </a>
-                <a href="qr-check-in.html"
-                    class="mobile-link block text-white px-4 py-3 text-sm rounded-lg hover:bg-indigo-700">
-                    <i class="fas fa-qrcode mr-3"></i>
-                    <span>QR Check-In</span>
-                </a>
-                <a href="notifications.html"
-                    class="mobile-link block text-white px-4 py-3 text-sm rounded-lg hover:bg-indigo-700">
-                    <i class="fas fa-bell mr-3"></i>
-                    <span>Notifications</span>
-                </a>
-                <a href="speech-tools.html"
-                    class="mobile-link block text-white px-4 py-3 text-sm rounded-lg hover:bg-indigo-700">
-                    <i class="fas fa-microphone mr-3"></i>
-                    <span>Speech Tools</span>
-                </a>
-                <a href="admin-events.html"
-                    class="mobile-link block text-white px-4 py-3 text-sm rounded-lg hover:bg-indigo-700">
-                    <i class="fas fa-tasks mr-3"></i>
-                    <span>Manage Events</span>
-                </a>
+            <!-- Mobile Navigation -->
+            <nav class="mt-5 px-4">
+                <div class="mb-4">
+                    <a href="create-event.html" id="mobile-create-event-link"
+                        class="create-event-btn flex items-center justify-center px-4 py-2 rounded-lg text-sm font-medium w-full">
+                        <i class="fas fa-plus mr-2"></i>
+                        Create Event
+                    </a>
+                </div>
+                <div class="space-y-1">
+                    <!-- Mobile menu items with same zoom-link styling -->
+                    <a href="dashboard.html" class="zoom-link block px-4 py-2 text-sm rounded-lg">
+                        <i class="fas fa-th-large w-5"></i>
+                        <span class="ml-3">Dashboard</span>
+                    </a>
+                    <!-- Add other mobile menu items following the same pattern -->
+                </div>
             </nav>
         </div>
     </div>
@@ -143,13 +179,13 @@
         // Mobile menu toggle
         document.querySelector('.mobile-menu-button').addEventListener('click', function () {
             document.querySelector('.mobile-menu-overlay').classList.remove('hidden');
+            document.querySelector('.mobile-menu').classList.remove('translate-x-full');
             document.querySelector('.mobile-menu').classList.add('translate-x-0');
-            document.querySelector('.mobile-menu').classList.remove('-translate-x-full');
         });
 
         document.querySelector('.close-menu-button').addEventListener('click', function () {
             document.querySelector('.mobile-menu').classList.remove('translate-x-0');
-            document.querySelector('.mobile-menu').classList.add('-translate-x-full');
+            document.querySelector('.mobile-menu').classList.add('translate-x-full');
             setTimeout(function () {
                 document.querySelector('.mobile-menu-overlay').classList.add('hidden');
             }, 300);
@@ -159,9 +195,12 @@
         document.querySelectorAll('.mobile-link').forEach(link => {
             link.addEventListener('click', function (e) {
                 e.preventDefault();
-                document.getElementById('content-frame').src = this.getAttribute('href');
+                const frame = document.getElementById('content-frame');
+                if (frame) {
+                    frame.src = this.getAttribute('href');
+                }
                 document.querySelector('.mobile-menu').classList.remove('translate-x-0');
-                document.querySelector('.mobile-menu').classList.add('-translate-x-full');
+                document.querySelector('.mobile-menu').classList.add('translate-x-full');
                 setTimeout(function () {
                     document.querySelector('.mobile-menu-overlay').classList.add('hidden');
                 }, 300);
@@ -173,19 +212,97 @@
             if (!link.classList.contains('mobile-link')) {
                 link.addEventListener('click', function (e) {
                     e.preventDefault();
-                    document.getElementById('content-frame').src = this.getAttribute('href');
-                    // Remove active class from all links
+                    const frame = document.getElementById('content-frame');
+                    if (frame) {
+                        frame.src = this.getAttribute('href');
+                    }
                     document.querySelectorAll('nav a').forEach(l => {
                         if (!l.classList.contains('mobile-link')) {
                             l.classList.remove('bg-indigo-700');
                         }
                     });
-                    // Add active class to clicked link
                     this.classList.add('bg-indigo-700');
                 });
             }
         });
+
+        // Logout function
+        function logout() {
+            localStorage.removeItem('token');
+            window.location.href = 'login.html';
+        }
+
+        // Check user role and update menu visibility
+        async function checkUserRole() {
+            const token = localStorage.getItem('token');
+            
+            try {
+                const res = await fetch('/api/auth/me', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                if (res.ok) {
+                    const user = await res.json();
+                    localStorage.setItem('userRole', user.role);
+                    updateMenuVisibility(user.role);
+                    updateUserInfo(user);
+                }
+            } catch (error) {
+                console.error('Error checking user role:', error);
+            }
+        }
+
+        function updateUserInfo(user) {
+            document.getElementById('sidebar-username').textContent = user.username || user.fullName;
+            document.getElementById('sidebar-role').textContent = user.role.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase());
+            document.getElementById('sidebar-profile-pic').src = user.profilePic || 'assets/images/user.png';
+        }
+
+        function updateMenuVisibility(userRole) {
+            // Desktop menu elements
+            const createEventLink = document.getElementById('create-event-link');
+            const approveEventsLink = document.getElementById('approve-events-link');
+            const adminManagementLink = document.getElementById('admin-management-link');
+            
+            // Mobile menu elements
+            const mobileCreateEventLink = document.getElementById('mobile-create-event-link');
+            const mobileApproveEventsLink = document.getElementById('mobile-approve-events-link');
+            const mobileAdminManagementLink = document.getElementById('mobile-admin-management-link');
+
+            if (userRole === 'admin') {
+                [createEventLink, approveEventsLink, adminManagementLink,
+                 mobileCreateEventLink, mobileApproveEventsLink, mobileAdminManagementLink]
+                .forEach(el => el && (el.style.display = ''));
+                return;
+            }
+
+            if (userRole === 'student') {
+                [createEventLink, mobileCreateEventLink]
+                .forEach(el => el && (el.style.display = 'none'));
+            }
+
+            if (userRole !== 'faculty') {
+                [approveEventsLink, mobileApproveEventsLink]
+                .forEach(el => el && (el.style.display = 'none'));
+            }
+
+            if (userRole !== 'admin') {
+                [adminManagementLink, mobileAdminManagementLink]
+                .forEach(el => el && (el.style.display = 'none'));
+            }
+        }
+
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', async () => {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                window.location.href = 'login.html';
+                return;
+            }
+            await checkUserRole();
+        });
     </script>
 </body>
-
 </html>

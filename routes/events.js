@@ -8,6 +8,7 @@ const Category = require('../models/Category');
 const Department = require('../models/Department');
 const Organization = require('../models/Organization');
 const mongoose = require('mongoose');
+const Notification = require('../models/Notification');
 
 // Get all events (with filtering)
 router.get('/', async (req, res) => {
@@ -47,7 +48,6 @@ router.get('/:id', async (req, res) => {
 // Create new event
 router.post('/', [
     auth,
-    checkRole(['teacher', 'admin']),
     body('title').trim().notEmpty(),
     body('description').trim().notEmpty(),
     body('date').isISO8601(),
@@ -64,16 +64,65 @@ router.post('/', [
             return res.status(400).json({ errors: errors.array() });
         }
 
+        // Check permissions based on user role and event category
+        if (req.user.role === 'student') {
+            return res.status(403).json({ message: 'Students cannot create events' });
+        }
+
+        if (req.user.role === 'student_leader') {
+            // Student leaders can only create events for their department/organization
+            if (req.body.category === 'department') {
+                if (!req.user.isDepartmentLeader) {
+                    return res.status(403).json({ message: 'You must be a department leader to create department events' });
+                }
+                if (!req.body.department || req.body.department.toString() !== req.user.department.toString()) {
+                    return res.status(403).json({ message: 'You can only create events for your own department' });
+                }
+            }
+            if (req.body.category === 'organization') {
+                if (!req.user.isOrganizationLeader) {
+                    return res.status(403).json({ message: 'You must be an organization leader to create organization events' });
+                }
+                if (!req.body.organization || req.body.organization.toString() !== req.user.organization.toString()) {
+                    return res.status(403).json({ message: 'You can only create events for your own organization' });
+                }
+            }
+        }
+
+        if (req.user.role === 'faculty') {
+            if (req.body.category === 'department') {
+                if (!req.body.department || req.body.department.toString() !== req.user.department.toString()) {
+                    return res.status(403).json({ message: 'Faculty can only create events for their own department' });
+                }
+            }
+        }
+
         const event = new Event({
             ...req.body,
-            organizer: req.user._id
+            organizer: req.user._id,
+            status: req.user.role === 'admin' ? 'approved' : 'pending'
         });
 
         await event.save();
+
+        // Create a notification for the event
+        let notificationType = 'school';
+        let notificationData = { title: event.title, message: event.description, type: 'school' };
+
+        if (event.category === 'department' && event.department) {
+            notificationType = 'department';
+            notificationData = { title: event.title, message: event.description, type: 'department', department: event.department };
+        } else if (event.category === 'organization' && event.organization) {
+            notificationType = 'organization';
+            notificationData = { title: event.title, message: event.description, type: 'organization', organization: event.organization };
+        }
+
+        await Notification.create(notificationData);
+
         res.status(201).json(event);
     } catch (err) {
         console.error('Event creation error:', err);
-        next(err); // Pass error to the global error handler
+        next(err);
     }
 });
 
@@ -154,10 +203,27 @@ router.get('/:id/participants', async (req, res) => {
 router.post('/:id/participants/:userId/attendance', auth, async (req, res) => {
     try {
         const { status } = req.body; // 'confirmed', 'not_sure', 'not_attending'
+        const allowedStatuses = ['confirmed', 'not_sure', 'not_attending'];
+        if (!allowedStatuses.includes(status)) return res.status(400).json({ error: 'Invalid status' });
+
         const event = await Event.findById(req.params.id);
         if (!event) return res.status(404).json({ message: 'Event not found' });
-        const participant = event.participants.find(p => p.user.toString() === req.params.userId);
+
+        // Find the correct participant by userId
+        const participant = event.participants.find(p => String(p.user) === String(req.params.userId));
         if (!participant) return res.status(404).json({ message: 'Participant not found' });
+
+        // Only allow students/student_leaders to set their own status, and only if not already set
+        if (["student", "student_leader"].includes(req.user.role)) {
+            if (String(req.user._id) !== String(req.params.userId)) {
+                return res.status(403).json({ error: 'Forbidden: You can only update your own attendance.' });
+            }
+            if (participant.attendanceStatus) {
+                return res.status(400).json({ error: 'Attendance already set' });
+            }
+        }
+
+        // Faculty/admin/staff can always update
         participant.attendanceStatus = status;
         await event.save();
         res.json({ message: 'Attendance status updated', participant });
@@ -281,6 +347,126 @@ router.get('/organizations/all', async (req, res) => {
     try {
         const organizations = await Organization.find().sort({ name: 1 });
         res.json(organizations);
+    } catch (error) {
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
+// Approve event (admin/faculty only)
+router.post('/:id/approve', [
+    auth,
+    checkRole(['admin', 'faculty']),
+    body('rejectionReason').optional().trim()
+], async (req, res) => {
+    try {
+        const event = await Event.findById(req.params.id);
+        if (!event) {
+            return res.status(404).json({ message: 'Event not found' });
+        }
+
+        if (event.status !== 'pending') {
+            return res.status(400).json({ message: 'Event is not pending approval' });
+        }
+
+        // Faculty can only approve events from their own department
+        if (req.user.role === 'faculty' && event.department && event.department.toString() !== req.user.department.toString()) {
+            return res.status(403).json({ message: 'You can only approve events from your own department' });
+        }
+
+        event.status = 'approved';
+        event.approvalStatus = {
+            approvedBy: req.user._id,
+            approvedAt: new Date()
+        };
+
+        await event.save();
+        res.json(event);
+    } catch (error) {
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
+// Reject event (admin/faculty only)
+router.post('/:id/reject', [
+    auth,
+    checkRole(['admin', 'faculty']),
+    body('rejectionReason').trim().notEmpty()
+], async (req, res) => {
+    try {
+        const event = await Event.findById(req.params.id);
+        if (!event) {
+            return res.status(404).json({ message: 'Event not found' });
+        }
+
+        if (event.status !== 'pending') {
+            return res.status(400).json({ message: 'Event is not pending approval' });
+        }
+
+        // Faculty can only reject events from their own department
+        if (req.user.role === 'faculty' && event.department && event.department.toString() !== req.user.department.toString()) {
+            return res.status(403).json({ message: 'You can only reject events from your own department' });
+        }
+
+        event.status = 'rejected';
+        event.approvalStatus = {
+            approvedBy: req.user._id,
+            approvedAt: new Date(),
+            rejectionReason: req.body.rejectionReason
+        };
+
+        await event.save();
+        res.json(event);
+    } catch (error) {
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
+// Get events (with role-based filtering)
+router.get('/', async (req, res) => {
+    try {
+        let query = {};
+        let user = null;
+        // Try to get user from token if present
+        if (req.headers.authorization && req.headers.authorization.startsWith('Bearer ')) {
+            const token = req.headers.authorization.split(' ')[1];
+            try {
+                const jwt = require('jsonwebtoken');
+                const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secret');
+                user = decoded;
+            } catch (e) { /* ignore invalid token */ }
+        }
+
+        // Filter based on user role or public
+        if (!user || user.role === 'student') {
+            query.status = { $in: ['approved', 'upcoming', 'ongoing'] };
+        } else if (user.role === 'student_leader') {
+            if (user.isDepartmentLeader) {
+                query.$or = [
+                    { status: { $in: ['approved', 'upcoming', 'ongoing'] } },
+                    { department: user.department, status: 'pending' }
+                ];
+            }
+            if (user.isOrganizationLeader) {
+                query.$or = [
+                    { status: { $in: ['approved', 'upcoming', 'ongoing'] } },
+                    { organization: user.organization, status: 'pending' }
+                ];
+            }
+        } else if (user.role === 'faculty') {
+            query.$or = [
+                { status: { $in: ['approved', 'upcoming', 'ongoing'] } },
+                { status: 'pending' }
+            ];
+        }
+        // Admin sees all events (no filter)
+
+        const events = await Event.find(query)
+            .populate('organizer', 'username email fullName')
+            .populate('department', 'name logo')
+            .populate('organization', 'name logo')
+            .sort({ date: 1 });
+
+        res.json(events);
     } catch (error) {
         res.status(500).json({ message: 'Server error' });
     }

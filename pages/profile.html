@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Profile | UniversityHub</title>
+
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body class="bg-gray-50">
+  <div class="container mx-auto px-4 py-6 max-w-xl">
+    <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
+      <h1 class="text-2xl font-bold text-gray-800 mb-4">My Profile</h1>
+      <div class="flex flex-col items-center">
+        <img id="profile-pic" src="assets/images/user.png" alt="Profile Picture" class="w-24 h-24 rounded-full border mb-2 object-cover">
+        <input type="file" id="profile-pic-upload" class="mb-4" accept="image/*">
+        <div class="w-full mb-2">
+          <label class="block text-gray-700 font-medium mb-1">Username</label>
+          <input id="profile-username" type="text" class="w-full border rounded px-3 py-2" />
+        </div>
+        <div class="w-full mb-2">
+          <label class="block text-gray-700 font-medium mb-1">Email</label>
+          <input id="profile-email" type="email" class="w-full border rounded px-3 py-2" />
+        </div>
+        <button id="save-profile" class="btn btn-primary w-full mt-2">Save Profile</button>
+      </div>
+    </div>
+    <div class="bg-white rounded-lg shadow-sm p-6">
+      <h2 class="text-lg font-semibold text-gray-800 mb-4">Change Password</h2>
+      <div class="mb-2">
+        <label class="block text-gray-700 font-medium mb-1">Old Password</label>
+        <input id="old-password" type="password" class="w-full border rounded px-3 py-2" />
+      </div>
+      <div class="mb-2">
+        <label class="block text-gray-700 font-medium mb-1">New Password</label>
+        <input id="new-password" type="password" class="w-full border rounded px-3 py-2" />
+      </div>
+      <button id="change-password" class="btn btn-secondary w-full mt-2">Change Password</button>
+    </div>
+  </div>
+  <script src="js/profile.js"></script>
+  <script src="../js/utils.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      setPageTitle('Profile');
+    });
+  </script>
+</body>
+</html> 

@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Event Approvals | UniversityHub</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body class="bg-gray-50">
+    <div class="min-h-screen">
+        <!-- Navigation -->
+        <nav class="bg-white shadow-lg">
+            <div class="max-w-7xl mx-auto px-4">
+                <div class="flex justify-between h-16">
+                    <div class="flex">
+                        <div class="flex-shrink-0 flex items-center">
+                            <a href="dashboard.html" class="text-xl font-bold text-indigo-600">UniversityHub</a>
+                        </div>
+                    </div>
+                    <div class="flex items-center">
+                        <span id="user-name" class="text-gray-700 mr-4"></span>
+                        <button onclick="logout()" class="text-gray-700 hover:text-gray-900">Logout</button>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+            <div class="px-4 py-6 sm:px-0">
+                <div class="bg-white shadow rounded-lg p-6">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-6">Event Approvals</h2>
+                    
+                    <!-- Tabs -->
+                    <div class="border-b border-gray-200 mb-6">
+                        <nav class="-mb-px flex space-x-8">
+                            <button onclick="showTab('pending')" class="tab-button border-indigo-500 text-indigo-600 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
+                                Pending Events
+                            </button>
+                            <button onclick="showTab('approved')" class="tab-button border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
+                                Approved Events
+                            </button>
+                            <button onclick="showTab('rejected')" class="tab-button border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
+                                Rejected Events
+                            </button>
+                        </nav>
+                    </div>
+
+                    <!-- Events List -->
+                    <div id="events-list" class="space-y-6">
+                        <!-- Events will be loaded here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reject Modal -->
+    <div id="reject-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden">
+        <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+            <div class="mt-3">
+                <h3 class="text-lg font-medium text-gray-900">Reject Event</h3>
+                <div class="mt-2 px-7 py-3">
+                    <p class="text-sm text-gray-500 mb-4">Please provide a reason for rejecting this event:</p>
+                    <textarea id="rejection-reason" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" rows="3"></textarea>
+                </div>
+                <div class="flex justify-end mt-4">
+                    <button onclick="closeRejectModal()" class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md mr-2">Cancel</button>
+                    <button onclick="rejectEvent()" class="px-4 py-2 bg-red-600 text-white rounded-md">Reject</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    let currentEventId = null;
+    let currentTab = 'pending';
+
+    // Check authentication
+    function checkAuth() {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            window.location.href = 'login.html';
+            return;
+        }
+
+        // Verify token and get user info
+        fetch('/api/auth/me', {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        })
+        .then(res => res.json())
+        .then(user => {
+            if (user.role !== 'faculty' && user.role !== 'admin') {
+                window.location.href = 'dashboard.html';
+                return;
+            }
+            document.getElementById('user-name').textContent = user.fullName;
+            loadEvents();
+        })
+        .catch(() => {
+            window.location.href = 'login.html';
+        });
+    }
+
+    // Show tab
+    function showTab(tab) {
+        currentTab = tab;
+        document.querySelectorAll('.tab-button').forEach(button => {
+            button.classList.remove('border-indigo-500', 'text-indigo-600');
+            button.classList.add('border-transparent', 'text-gray-500');
+        });
+        event.target.classList.remove('border-transparent', 'text-gray-500');
+        event.target.classList.add('border-indigo-500', 'text-indigo-600');
+        loadEvents();
+    }
+
+    // Load events
+    async function loadEvents() {
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch('/api/events', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const events = await res.json();
+
+            // Filter events based on current tab
+            const filteredEvents = events.filter(event => {
+                if (currentTab === 'pending') return event.status === 'pending';
+                if (currentTab === 'approved') return event.status === 'approved';
+                if (currentTab === 'rejected') return event.status === 'rejected';
+                return false;
+            });
+
+            // Render events
+            const eventsList = document.getElementById('events-list');
+            eventsList.innerHTML = filteredEvents.map(event => `
+                <div class="bg-white shadow rounded-lg p-6">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <h3 class="text-lg font-medium text-gray-900">${event.title}</h3>
+                            <p class="mt-1 text-sm text-gray-500">${event.description}</p>
+                            <div class="mt-2 text-sm text-gray-500">
+                                <p>Date: ${new Date(event.date).toLocaleDateString()}</p>
+                                <p>Time: ${event.time}</p>
+                                <p>Location: ${event.location}</p>
+                                <p>Category: ${event.category}</p>
+                                <p>Organizer: ${event.organizer.fullName}</p>
+                                ${event.department ? `<p>Department: ${event.department.name}</p>` : ''}
+                                ${event.organization ? `<p>Organization: ${event.organization.name}</p>` : ''}
+                            </div>
+                        </div>
+                        ${event.status === 'pending' ? `
+                            <div class="flex space-x-2">
+                                <button onclick="approveEvent('${event._id}')" 
+                                        class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700">
+                                    Approve
+                                </button>
+                                <button onclick="openRejectModal('${event._id}')" 
+                                        class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700">
+                                    Reject
+                                </button>
+                            </div>
+                        ` : `
+                            <div class="px-3 py-1 rounded-full text-sm
+                                ${event.status === 'approved' ? 'bg-green-100 text-green-800' : 
+                                  event.status === 'rejected' ? 'bg-red-100 text-red-800' : ''}">
+                                ${event.status.charAt(0).toUpperCase() + event.status.slice(1)}
+                            </div>
+                        `}
+                    </div>
+                    ${event.status === 'rejected' && event.approvalStatus?.rejectionReason ? `
+                        <div class="mt-4 p-4 bg-red-50 rounded-md">
+                            <p class="text-sm text-red-800">
+                                <strong>Rejection Reason:</strong> ${event.approvalStatus.rejectionReason}
+                            </p>
+                        </div>
+                    ` : ''}
+                </div>
+            `).join('');
+        } catch (error) {
+            console.error('Error loading events:', error);
+        }
+    }
+
+    // Approve event
+    async function approveEvent(eventId) {
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch(`/api/events/${eventId}/approve`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (res.ok) {
+                loadEvents();
+            } else {
+                const error = await res.json();
+                alert(error.message || 'Failed to approve event');
+            }
+        } catch (error) {
+            console.error('Error approving event:', error);
+            alert('Failed to approve event');
+        }
+    }
+
+    // Modal functions
+    function openRejectModal(eventId) {
+        currentEventId = eventId;
+        document.getElementById('reject-modal').classList.remove('hidden');
+    }
+
+    function closeRejectModal() {
+        document.getElementById('reject-modal').classList.add('hidden');
+        document.getElementById('rejection-reason').value = '';
+        currentEventId = null;
+    }
+
+    // Reject event
+    async function rejectEvent() {
+        const reason = document.getElementById('rejection-reason').value.trim();
+        if (!reason) {
+            alert('Please provide a reason for rejection');
+            return;
+        }
+
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch(`/api/events/${currentEventId}/reject`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ rejectionReason: reason })
+            });
+
+            if (res.ok) {
+                closeRejectModal();
+                loadEvents();
+            } else {
+                const error = await res.json();
+                alert(error.message || 'Failed to reject event');
+            }
+        } catch (error) {
+            console.error('Error rejecting event:', error);
+            alert('Failed to reject event');
+        }
+    }
+
+    // Logout
+    function logout() {
+        localStorage.removeItem('token');
+        window.location.href = 'login.html';
+    }
+
+    // Check auth when page loads
+    document.addEventListener('DOMContentLoaded', checkAuth);
+    </script>
+</body>
+</html> 

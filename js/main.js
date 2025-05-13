@@ -37,7 +37,7 @@ function fetchTodaysEvents() {
     .then(events => {
       console.log('All events fetched:', events);
       // Robust filtering for today's events
-      const todaysEvents = events.filter(ev => new Date(ev.date).toISOString().split('T')[0] === todayStr);
+      const todaysEvents = events.filter(ev => new Date(ev.date).toISOString().split('T')[0] === todayStr && ev.status !== 'pending');
       console.log('Events for today:', todaysEvents);
       const container = document.getElementById('todays-events-list');
       if (!container) return;
@@ -122,11 +122,11 @@ function fetchStatsOverview() {
     fetch(`/api/events`).then(res => res.json()),
   ]).then(([allEvents]) => {
     // Robust filtering for today's events
-    const todaysEvents = allEvents.filter(ev => new Date(ev.date).toISOString().split('T')[0] === todayStr);
+    const todaysEvents = allEvents.filter(ev => new Date(ev.date).toISOString().split('T')[0] === todayStr && ev.status !== 'pending');
     // This Week's Events
     const weekEvents = allEvents.filter(ev => {
       const eventDateStr = new Date(ev.date).toISOString().split('T')[0];
-      return eventDateStr >= weekStart && eventDateStr <= weekEnd;
+      return eventDateStr >= weekStart && eventDateStr <= weekEnd && ev.status !== 'pending';
     });
     // Registrations: sum of all currentParticipants
     const registrations = allEvents.reduce((sum, ev) => sum + (ev.currentParticipants || 0), 0);
@@ -201,11 +201,11 @@ function fetchUpcomingEvents() {
     .then(res => res.json())
     .then(events => {
       // Filter for events after today
-      const upcoming = events.filter(ev => new Date(ev.date).toISOString().split('T')[0] > todayStr);
+      const upcomingEvents = events.filter(ev => new Date(ev.date).toISOString().split('T')[0] > todayStr && ev.status !== 'pending');
       // Sort by soonest
-      upcoming.sort((a, b) => new Date(a.date) - new Date(b.date));
+      upcomingEvents.sort((a, b) => new Date(a.date) - new Date(b.date));
       // Take next 3
-      const nextEvents = upcoming.slice(0, 3);
+      const nextEvents = upcomingEvents.slice(0, 3);
       const container = document.getElementById('upcoming-events-list');
       if (!container) return;
       container.innerHTML = '';

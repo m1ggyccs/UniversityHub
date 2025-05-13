@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - School Event Management</title>
+    <title>Dashboard | UniversityHub</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
     <link rel="stylesheet" href="../css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
@@ -16,13 +16,12 @@
         <div class="bg-white rounded-lg shadow-sm p-6 mb-6 border-l-4 border-indigo-600">
             <div class="flex items-center justify-between">
                 <div>
-                    <h1 class="text-2xl font-bold text-gray-800">Welcome to Event Manager</h1>
-                    <p class="text-gray-600 mt-1" id="today-date"></p>
+                    <h1 class="text-2xl font-bold text-gray-800" id="welcome-message">Welcome, <p class="text-gray-600 mt-1" id="user-fullname"></p></h1>
+                    <p class="text-gray-600 mt-1" id="user-fullname"></p>
+                    <p class="text-gray-500 mt-1" id="today-date"></p>
                 </div>
-                <div class="hidden sm:block">
-                    <button class="btn btn-primary">
-                        <i class="fas fa-plus mr-2"></i>Quick Create
-                    </button>
+                <div class="hidden md:block">
+                    <img src="../assets/images/university-hub-logo.png" alt="UniversityHub Logo" class="h-12 w-auto">
                 </div>
             </div>
         </div>
@@ -65,7 +64,38 @@
         </div>
     </div>
 
+    <script src="../js/utils.js"></script>
+    <script>
+        // Update user info when page loads
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Set page title
+            setPageTitle('Dashboard');
+            
+            // Get user info
+            const token = localStorage.getItem('token');
+            if (token) {
+                try {
+                    const res = await fetch('/api/auth/me', {
+                        headers: {
+                            'Authorization': `Bearer ${token}`
+                        }
+                    });
+                    if (res.ok) {
+                        const user = await res.json();
+                        // Update welcome message with user's full name
+                        document.getElementById('user-fullname').textContent = user.fullName;
+                    }
+                } catch (error) {
+                    console.error('Error fetching user info:', error);
+                }
+            }
+
+            // Set today's date
+            const today = new Date();
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('today-date').textContent = today.toLocaleDateString('en-US', options);
+        });
+    </script>
     <script src="js/main.js"></script>
 </body>
-
 </html>

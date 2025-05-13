@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Event Details - School Event Management</title>
+  <title>Event Details | UniversityHub</title>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
   <link rel="stylesheet" href="../css/style.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
@@ -12,37 +12,75 @@
 
 <body class="bg-gray-50">
   <div class="container mx-auto px-4 py-6">
+    <!-- Accessibility Controls -->
+    <div class="bg-white rounded-lg shadow-sm p-4 mb-6">
+      <div class="flex items-center justify-between">
+        <h2 class="text-lg font-semibold text-gray-800">Accessibility Options</h2>
+        <div class="flex space-x-4">
+          <button id="read-event-btn" class="btn btn-primary flex items-center" aria-label="Read event details aloud">
+            <i class="fas fa-volume-up mr-2"></i>
+            Read Event Details
+          </button>
+          <button id="stop-reading-btn" class="btn btn-secondary flex items-center hidden" aria-label="Stop reading">
+            <i class="fas fa-stop mr-2"></i>
+            Stop Reading
+          </button>
+          <div class="flex items-center">
+            <label for="reading-speed" class="mr-2 text-sm text-gray-600">Reading Speed:</label>
+            <select id="reading-speed" class="form-select rounded-md border-gray-300" aria-label="Select reading speed">
+              <option value="0.8">Slow</option>
+              <option value="1" selected>Normal</option>
+              <option value="1.2">Fast</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
       <!-- Left Column: Event Info + QR -->
       <div class="flex flex-col">
         <div class="bg-white rounded-lg shadow-sm p-6 mb-6 flex-1">
           <div class="flex items-center justify-between">
             <div>
-              <h1 class="text-2xl font-bold text-gray-800" id="event-title">Event Details</h1>
-              <p class="text-gray-600 mt-1" id="event-category"></p>
+              <h1 class="text-2xl font-bold text-gray-800" id="event-title" tabindex="0">Event Details</h1>
+              <p class="text-gray-600 mt-1" id="event-category" tabindex="0"></p>
             </div>
             <div>
-              <a href="event-list.html" class="btn btn-secondary">
-                <i class="fas fa-arrow-left mr-2"></i>Back to Event List
+              <a href="event-list.html" class="btn btn-secondary" aria-label="Back to Event List">
+                <i class="fas fa-arrow-left mr-2" aria-hidden="true"></i>Back to Event List
               </a>
             </div>
           </div>
-          <p class="mb-2"><span class="font-medium">Description:</span> <span id="event-description"></span></p>
-          <p class="mb-2"><span class="font-medium">Date:</span> <span id="event-date"></span></p>
-          <p class="mb-2"><span class="font-medium">Time:</span> <span id="event-time"></span></p>
-          <p class="mb-2"><span class="font-medium">Location:</span> <span id="event-location"></span></p>
-          <p class="mb-2"><span class="font-medium">Category:</span> <span id="event-category-detail"></span></p>
-          <p class="mb-2"><span class="font-medium">Department:</span> <span id="event-department"></span></p>
-          <p class="mb-2"><span class="font-medium">Status:</span> <span id="event-status"></span></p>
-          <p class="mb-2"><span class="font-medium">Organizer:</span> <span id="event-organizer"></span></p>
-          <p class="mb-2"><span class="font-medium">Email:</span> <span id="event-organizer-email"></span></p>
-          <p class="mb-2"><span class="font-medium">Participants:</span> <span id="event-participants"></span></p>
-          <p class="mb-2"><span class="font-medium">Max Participants:</span> <span id="event-max-participants"></span></p>
+          <div class="space-y-2 mt-4" id="event-details-content">
+            <p class="mb-2"><span class="font-medium">Description:</span> <span id="event-description" tabindex="0"></span></p>
+            <p class="mb-2"><span class="font-medium">Date:</span> <span id="event-date" tabindex="0"></span></p>
+            <p class="mb-2"><span class="font-medium">Time:</span> <span id="event-time" tabindex="0"></span></p>
+            <p class="mb-2">
+              <span class="font-medium">Location:</span> 
+              <a id="event-location" 
+                 href="#" 
+                 class="text-indigo-600 hover:text-indigo-800 hover:underline" 
+                 target="_blank" 
+                 rel="noopener noreferrer" 
+                 tabindex="0"
+                 aria-label="View location on Google Maps">
+              </a>
+              <i class="fas fa-map-marker-alt ml-1 text-indigo-600" aria-hidden="true"></i>
+            </p>
+            <p class="mb-2"><span class="font-medium">Category:</span> <span id="event-category-detail" tabindex="0"></span></p>
+            <p class="mb-2"><span class="font-medium">Department:</span> <span id="event-department" tabindex="0"></span></p>
+            <p class="mb-2"><span class="font-medium">Status:</span> <span id="event-status" tabindex="0"></span></p>
+            <p class="mb-2"><span class="font-medium">Organizer:</span> <span id="event-organizer" tabindex="0"></span></p>
+            <p class="mb-2"><span class="font-medium">Email:</span> <span id="event-organizer-email" tabindex="0"></span></p>
+            <p class="mb-2"><span class="font-medium">Participants:</span> <span id="event-participants" tabindex="0"></span></p>
+            <p class="mb-2"><span class="font-medium">Max Participants:</span> <span id="event-max-participants" tabindex="0"></span></p>
+          </div>
         </div>
         <div class="bg-white rounded-lg shadow-sm p-6">
-          <h2 class="text-lg font-semibold text-gray-800 mb-2">Event QR Code</h2>
+          <h2 class="text-lg font-semibold text-gray-800 mb-2" tabindex="0">Event QR Code</h2>
           <div class="flex justify-center items-center">
-            <div id="event-qr" class="w-32 h-32 max-w-full"></div>
+            <div id="event-qr" class="w-32 h-32 max-w-full" role="img" aria-label="QR code for event registration"></div>
           </div>
         </div>
       </div>
@@ -54,18 +92,65 @@
   </div>
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script src="../js/jquery.qrcode.min.js"></script>
+  <script src="../js/utils.js"></script>
   <script>
   // Helper to get query param
   function getQueryParam(name) {
     const url = new URL(window.location.href);
     return url.searchParams.get(name);
   }
+
   // Format date
   function formatDate(dateStr) {
     if (!dateStr) return '';
     const d = new Date(dateStr);
     return d.toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
   }
+
+  // Text-to-Speech functionality
+  let speechSynthesis = window.speechSynthesis;
+  let currentUtterance = null;
+
+  function stopReading() {
+    if (speechSynthesis && currentUtterance) {
+      speechSynthesis.cancel();
+      currentUtterance = null;
+      document.getElementById('read-event-btn').classList.remove('hidden');
+      document.getElementById('stop-reading-btn').classList.add('hidden');
+    }
+  }
+
+  function readEventDetails() {
+    if (!speechSynthesis) {
+      alert('Text-to-speech is not supported in your browser.');
+      return;
+    }
+
+    // Stop any ongoing speech
+    stopReading();
+
+    // Get all the event details
+    const detailsContent = document.getElementById('event-details-content');
+    const textToRead = Array.from(detailsContent.children)
+      .map(p => p.textContent.trim())
+      .join('. ');
+
+    // Create and configure utterance
+    currentUtterance = new SpeechSynthesisUtterance(textToRead);
+    currentUtterance.rate = parseFloat(document.getElementById('reading-speed').value);
+    currentUtterance.onend = () => {
+      document.getElementById('read-event-btn').classList.remove('hidden');
+      document.getElementById('stop-reading-btn').classList.add('hidden');
+    };
+
+    // Show/hide buttons
+    document.getElementById('read-event-btn').classList.add('hidden');
+    document.getElementById('stop-reading-btn').classList.remove('hidden');
+
+    // Start speaking
+    speechSynthesis.speak(currentUtterance);
+  }
+
   // Fetch and display event details
   async function loadEventDetails() {
     const eventId = getQueryParam('id');
@@ -90,12 +175,14 @@
       document.getElementById('event-organizer').textContent = event.organizer && (event.organizer.fullName || event.organizer.username || event.organizer.email || event.organizer._id) ? (event.organizer.fullName || event.organizer.username || event.organizer.email || event.organizer._id) : 'N/A';
       document.getElementById('event-organizer-email').textContent = event.organizer && event.organizer.email ? event.organizer.email : 'N/A';
       document.getElementById('event-department').textContent = event.department && event.department.name ? event.department.name : 'N/A';
+
       // Show pubmat if present
       if (event.pubmat) {
         const pubmatImg = document.getElementById('event-pubmat');
         pubmatImg.src = event.pubmat;
         pubmatImg.classList.remove('hidden');
       }
+
       // Generate QR code for the registration link (smaller size)
       if (event.customRegistrationLink) {
         $('#event-qr').empty().qrcode({ width: 128, height: 128, text: event.customRegistrationLink });
@@ -104,11 +191,44 @@
         const regUrl = window.location.origin + '/event-register.html?id=' + eventId;
         $('#event-qr').empty().qrcode({ width: 128, height: 128, text: regUrl });
       }
+
+      // Update location with Google Maps link
+      const locationElement = document.getElementById('event-location');
+      locationElement.textContent = event.location;
+      if (event.location) {
+        const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(event.location)}`;
+        locationElement.href = mapsUrl;
+        locationElement.setAttribute('aria-label', `View ${event.location} on Google Maps`);
+      }
     } catch (err) {
       alert('Failed to load event details.');
     }
   }
-  window.addEventListener('DOMContentLoaded', loadEventDetails);
+
+  // Initialize event listeners
+  document.addEventListener('DOMContentLoaded', async () => {
+    setPageTitle('Event Details');
+    loadEventDetails();
+    
+    // Text-to-speech controls
+    document.getElementById('read-event-btn').addEventListener('click', readEventDetails);
+    document.getElementById('stop-reading-btn').addEventListener('click', stopReading);
+    document.getElementById('reading-speed').addEventListener('change', function() {
+      if (currentUtterance) {
+        currentUtterance.rate = parseFloat(this.value);
+      }
+    });
+
+    // Cleanup on page unload
+    window.addEventListener('beforeunload', stopReading);
+
+    // Handle keyboard navigation
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && currentUtterance) {
+        stopReading();
+      }
+    });
+  });
   </script>
 </body>
 

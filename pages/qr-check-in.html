@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QR Check-in - School Event Management</title>
+    <title>Event Check-in | UniversityHub</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
     <link rel="stylesheet" href="../css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
@@ -16,7 +16,7 @@
         <div class="bg-white rounded-lg shadow-sm p-6 mb-6 border-l-4 border-indigo-600">
             <div class="flex items-center justify-between">
                 <div>
-                    <h1 class="text-2xl font-bold text-gray-800">QR Code Check-in</h1>
+                    <h1 class="text-2xl font-bold text-gray-800">Event Check-in</h1>
                     <p class="text-gray-600 mt-1">Scan QR codes to record attendance</p>
                 </div>
                 <div class="hidden sm:block">
@@ -29,238 +29,65 @@
 
         <!-- Event Selection and QR Scanner -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <!-- Event Selection -->
+            <!-- Left: Event Selection -->
             <div class="md:col-span-1">
                 <div class="bg-white rounded-lg shadow-sm overflow-hidden mb-6">
-                    <div class="border-b border-gray-200 px-6 py-4">
-                        <h2 class="text-lg font-semibold text-gray-800">Select Event</h2>
-                    </div>
+                    <div class="border-b border-gray-200 px-6 py-4 font-bold text-lg">Select Event</div>
                     <div class="p-6">
-                        <div class="mb-4">
-                            <label for="event-select" class="block text-sm font-medium text-gray-700 mb-1">Current
-                                Events</label>
-                            <select id="event-select"
-                                class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
-                                <option value="">Select an event</option>
-                                <option value="1">Mobile App Development Workshop</option>
-                                <option value="2">Robotics Competition Briefing</option>
-                                <option value="3">Photography Exhibition Opening</option>
-                                <option value="4">Entrepreneurship Networking Night</option>
-                            </select>
-                        </div>
-
-                        <!-- Event Info -->
-                        <div class="mt-6 p-4 bg-gray-50 rounded-lg">
-                            <h3 class="font-medium text-gray-900">Selected Event Info</h3>
-                            <div class="mt-2 text-sm text-gray-600 space-y-2">
-                                <p><i class="fas fa-map-marker-alt w-5 text-center"></i> CS Building Room 204</p>
-                                <p><i class="fas fa-clock w-5 text-center"></i> 10:00 AM - 12:00 PM</p>
-                                <p><i class="fas fa-users w-5 text-center"></i> 45 registered / 50 capacity</p>
-                            </div>
-                        </div>
-
-                        <!-- Check-in Stats -->
-                        <div class="mt-6">
-                            <h3 class="font-medium text-gray-900 mb-2">Check-in Statistics</h3>
-                            <div class="flex items-center justify-between bg-blue-50 p-3 rounded-lg">
-                                <span class="text-sm font-medium text-blue-800">Checked-in</span>
-                                <span class="text-lg font-bold text-blue-800">24 / 45</span>
-                            </div>
-                            <div class="mt-2 h-2 bg-gray-200 rounded-full overflow-hidden">
-                                <div class="bg-blue-600 h-2 rounded-full" style="width: 53%"></div>
-                            </div>
-                            <div class="mt-4 grid grid-cols-2 gap-3">
-                                <div class="bg-green-50 p-3 rounded-lg text-center">
-                                    <span class="block text-sm font-medium text-green-800">Present</span>
-                                    <span class="block text-xl font-bold text-green-800">53%</span>
-                                </div>
-                                <div class="bg-red-50 p-3 rounded-lg text-center">
-                                    <span class="block text-sm font-medium text-red-800">Absent</span>
-                                    <span class="block text-xl font-bold text-red-800">47%</span>
-                                </div>
-                            </div>
+                        <label class="block font-semibold mb-2">Current Events</label>
+                        <select id="event-select" class="w-full mb-4"></select>
+                        <div id="event-info" class="mt-4">
+                            <!-- Event information will be rendered here -->
                         </div>
                     </div>
                 </div>
             </div>
-
-            <!-- QR Scanner and Attendee Management -->
+            <!-- Right: Attendee Management -->
             <div class="md:col-span-2">
                 <div class="bg-white rounded-lg shadow-sm overflow-hidden mb-6">
-                    <div class="border-b border-gray-200 px-6 py-4 flex items-center justify-between">
-                        <h2 class="text-lg font-semibold text-gray-800">Attendee Management</h2>
-                    </div>
-                    <div class="p-6" id="attendee-management-section">
-                        <!-- Attendee management and QR code will be rendered here by JS -->
+                    <div class="border-b border-gray-200 px-6 py-4 font-bold text-lg">Attendee Management</div>
+                    <div class="p-6">
+                        <div class="flex flex-col md:flex-row md:space-x-6">
+                            <div class="flex-1">
+                                <div id="event-details" class="mb-4">
+                                    <!-- Event info (location, time, etc.) -->
+                                </div>
+                                <div id="attendees-section" class="mb-4">
+                                    <div class="font-bold mb-2">Attendees</div>
+                                    <div id="attendees-list"></div>
+                                    <div id="attendance-buttons" class="flex space-x-4 mt-4">
+                                        <button class="btn" id="sample-confirm-btn">Confirm</button>
+                                        <button class="btn" id="sample-not-sure-btn">Not Sure</button>
+                                        <button class="btn" id="sample-not-attend-btn">Will Not Attend</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex-shrink-0 flex flex-col items-center justify-center">
+                                <div id="qr-code" class="mb-2"></div>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div class="bg-white rounded-lg shadow-sm overflow-hidden mb-6">
-                    <div class="border-b border-gray-200 px-6 py-4">
-                        <h2 class="text-lg font-semibold text-gray-800">Check-in Statistics</h2>
-                    </div>
-                    <div class="p-6" id="checkin-stats-section">
-                        <!-- Check-in stats will be rendered here by JS -->
-                    </div>
+                    <div class="border-b border-gray-200 px-6 py-4 font-bold text-lg">Check-in Stats</div>
+                    <div class="p-6" id="checkin-stats-section"></div>
                 </div>
                 <div class="bg-white rounded-lg shadow-sm overflow-hidden mb-6">
-                    <div class="border-b border-gray-200 px-6 py-4">
-                        <h2 class="text-lg font-semibold text-gray-800">Recent Check-ins</h2>
-                    </div>
-                    <div class="p-6" id="recent-checkins-section">
-                        <!-- Recent check-ins will be rendered here by JS -->
-                    </div>
+                    <div class="border-b border-gray-200 px-6 py-4 font-bold text-lg">Recent Check-in</div>
+                    <div class="p-6" id="recent-checkins-section"></div>
                 </div>
             </div>
         </div>
     </div>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="../js/jquery.qrcode.min.js"></script>
+    <script src="../js/qr-check-in.js"></script>
+    <script src="../js/utils.js"></script>
     <script>
-    // Dynamically load events into the dropdown
-    async function loadEventsDropdown() {
-      const res = await fetch('/api/events');
-      const events = await res.json();
-      const select = document.getElementById('event-select');
-      select.innerHTML = '<option value="">Select an event</option>' +
-        events.map(ev => `<option value="${ev._id}">${ev.title} (${new Date(ev.date).toLocaleDateString()})</option>`).join('');
-    }
-
-    // Show event info, pubmat, QR code, and participants
-    async function onEventSelect() {
-      const eventId = document.getElementById('event-select').value;
-      const infoDiv = document.querySelector('.mt-6.p-4.bg-gray-50.rounded-lg');
-      // Remove previous QR and attendees
-      document.getElementById('attendee-management-section').innerHTML = '';
-      document.getElementById('checkin-stats-section').innerHTML = '';
-      document.getElementById('recent-checkins-section').innerHTML = '';
-      if (!eventId) return;
-      const res = await fetch(`/api/events/${eventId}`);
-      const event = await res.json();
-      // Show pubmat if any and QR code
-      let pubmatHtml = '';
-      if (event.pubmat) {
-        pubmatHtml = `<img src="${event.pubmat}" alt="Event Pubmat" class="w-full max-h-48 object-contain rounded mb-4" />`;
-      }
-      const regUrl = event.customRegistrationLink || (window.location.origin + '/event-register.html?id=' + event._id);
-      let qrHtml = `<div class='flex justify-center my-4'><div id='event-qr-preview'></div></div>`;
-      document.getElementById('attendee-management-section').innerHTML = `
-        <h3 class="font-medium text-gray-900 mb-2">Event Info</h3>
-        ${pubmatHtml}
-        <div class="mt-2 text-sm text-gray-600 space-y-2">
-          <p><i class="fas fa-map-marker-alt w-5 text-center"></i> ${event.location || ''}</p>
-          <p><i class="fas fa-clock w-5 text-center"></i> ${event.time || ''}</p>
-          <p><i class="fas fa-users w-5 text-center"></i> ${event.currentParticipants || 0} registered / ${event.maxParticipants || 0} capacity</p>
-        </div>
-        ${qrHtml}
-        <div id="attendees-list"></div>
-      `;
-      $("#event-qr-preview").qrcode({ width: 128, height: 128, text: regUrl });
-      // Show participants with attendance status buttons
-      showParticipants(eventId);
-      // Show check-in stats
-      showCheckinStats(eventId);
-      // Show recent check-ins
-      showRecentCheckins(eventId);
-    }
-
-    async function showParticipants(eventId) {
-      const res = await fetch(`/api/events/${eventId}/participants`);
-      const participants = await res.json();
-      let html = `<h3 class="font-medium text-gray-900 mt-6 mb-3">Attendees</h3>`;
-      if (!participants.length) {
-        html += '<div class="text-gray-500 mb-2">No registered attendees.</div>';
-        // Show a sample row with disabled buttons for UI clarity
-        html += `<div class='flex items-center justify-between bg-gray-50 rounded p-2 opacity-60'>
-          <div><span class='font-medium'>No attendees yet</span></div>
-          <div class='space-x-1'>
-            <button class='btn btn-xs btn-secondary' disabled>Confirm</button>
-            <button class='btn btn-xs btn-secondary' disabled>Not Sure</button>
-            <button class='btn btn-xs btn-secondary' disabled>Will Not Attend</button>
-          </div>
-        </div>`;
-      } else {
-        html += '<div class="space-y-2">';
-        participants.forEach(p => {
-          html += `
-            <div class="flex items-center justify-between bg-gray-50 rounded p-2">
-              <div>
-                <span class="font-medium">${p.user?.fullName || p.user?.username || 'Unknown'}</span>
-                <span class="ml-2 text-xs text-gray-500">(${p.user?.email || ''})</span>
-              </div>
-              <div class="space-x-1">
-                <button class="btn btn-xs ${p.attendanceStatus === 'confirmed' ? 'bg-green-600 text-white' : 'btn-secondary'}" onclick="updateAttendance('${eventId}', '${p.user?._id}', 'confirmed')">Confirm</button>
-                <button class="btn btn-xs ${p.attendanceStatus === 'not_sure' ? 'bg-yellow-400 text-white' : 'btn-secondary'}" onclick="updateAttendance('${eventId}', '${p.user?._id}', 'not_sure')">Not Sure</button>
-                <button class="btn btn-xs ${p.attendanceStatus === 'not_attending' ? 'bg-red-600 text-white' : 'btn-secondary'}" onclick="updateAttendance('${eventId}', '${p.user?._id}', 'not_attending')">Will Not Attend</button>
-              </div>
-            </div>
-          `;
+        document.addEventListener('DOMContentLoaded', () => {
+            setPageTitle('QR Check-in');
+            // ... existing code ...
         });
-        html += '</div>';
-      }
-      // Insert after event info
-      const infoDiv = document.getElementById('attendee-management-section');
-      let attendeesDiv = document.getElementById('attendees-list');
-      if (!attendeesDiv) {
-        attendeesDiv = document.createElement('div');
-        attendeesDiv.id = 'attendees-list';
-        infoDiv.appendChild(attendeesDiv);
-      }
-      attendeesDiv.innerHTML = html;
-    }
-
-    async function updateAttendance(eventId, userId, status) {
-      await fetch(`/api/events/${eventId}/participants/${userId}/attendance`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status })
-      });
-      showParticipants(eventId);
-    }
-
-    // Add showCheckinStats and showRecentCheckins
-    async function showCheckinStats(eventId) {
-      const res = await fetch(`/api/events/${eventId}/participants`);
-      const participants = await res.json();
-      const total = participants.length;
-      const confirmed = participants.filter(p => p.attendanceStatus === 'confirmed').length;
-      const notSure = participants.filter(p => p.attendanceStatus === 'not_sure').length;
-      const notAttending = participants.filter(p => p.attendanceStatus === 'not_attending').length;
-      let html = `<div class="flex space-x-4">
-        <div class="bg-green-50 p-4 rounded-lg text-center flex-1">
-          <span class="block text-sm font-medium text-green-800">Confirmed</span>
-          <span class="block text-2xl font-bold text-green-800">${confirmed}</span>
-        </div>
-        <div class="bg-yellow-50 p-4 rounded-lg text-center flex-1">
-          <span class="block text-sm font-medium text-yellow-800">Not Sure</span>
-          <span class="block text-2xl font-bold text-yellow-800">${notSure}</span>
-        </div>
-        <div class="bg-red-50 p-4 rounded-lg text-center flex-1">
-          <span class="block text-sm font-medium text-red-800">Will Not Attend</span>
-          <span class="block text-2xl font-bold text-red-800">${notAttending}</span>
-        </div>
-        <div class="bg-blue-50 p-4 rounded-lg text-center flex-1">
-          <span class="block text-sm font-medium text-blue-800">Total</span>
-          <span class="block text-2xl font-bold text-blue-800">${total}</span>
-        </div>
-      </div>`;
-      document.getElementById('checkin-stats-section').innerHTML = html;
-    }
-    async function showRecentCheckins(eventId) {
-      const res = await fetch(`/api/events/${eventId}/participants`);
-      const participants = await res.json();
-      // Show the last 5 status changes (simulate with the last 5 participants for now)
-      let html = `<table class="min-w-full divide-y divide-gray-200"><thead class="bg-gray-50"><tr><th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th><th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th></tr></thead><tbody class="bg-white divide-y divide-gray-200">`;
-      participants.slice(-5).reverse().forEach(p => {
-        html += `<tr><td class="px-6 py-4 whitespace-nowrap">${p.user?.fullName || p.user?.username || 'Unknown'}</td><td class="px-6 py-4 whitespace-nowrap">${p.attendanceStatus.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}</td></tr>`;
-      });
-      html += '</tbody></table>';
-      document.getElementById('recent-checkins-section').innerHTML = html;
-    }
-
-    document.addEventListener('DOMContentLoaded', function() {
-      loadEventsDropdown();
-      document.getElementById('event-select').addEventListener('change', onEventSelect);
-    });
     </script>
 </body>
 

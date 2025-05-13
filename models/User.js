@@ -21,7 +21,7 @@ const userSchema = new mongoose.Schema({
     },
     role: {
         type: String,
-        enum: ['student', 'teacher', 'admin'],
+        enum: ['admin', 'faculty', 'student_leader', 'student'],
         default: 'student'
     },
     fullName: {
@@ -29,8 +29,26 @@ const userSchema = new mongoose.Schema({
         required: true
     },
     department: {
-        type: String,
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Department',
         required: true
+    },
+    organization: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Organization',
+        required: false
+    },
+    isDepartmentLeader: {
+        type: Boolean,
+        default: false
+    },
+    isOrganizationLeader: {
+        type: Boolean,
+        default: false
+    },
+    profilePic: {
+        type: String,
+        required: false
     },
     createdAt: {
         type: Date,

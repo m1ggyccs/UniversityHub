@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Create Event - School Event Management</title>
+    <title>Create Event | UniversityHub</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
     <link rel="stylesheet" href="../css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
@@ -207,17 +207,30 @@
     <script src="https://cdn.jsdelivr.net/npm/jwt-decode@3.1.2/build/jwt-decode.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="../js/jquery.qrcode.min.js"></script>
+    <script src="../js/utils.js"></script>
     <script>
-    // Fetch departments and organizations for dropdowns
-    async function populateDropdown(url, selectId) {
-        const res = await fetch(url);
-        const data = await res.json();
-        const select = document.getElementById(selectId);
-        select.innerHTML = '<option value="">Select</option>' + data.map(item => `<option value="${item._id}">${item.name}</option>`).join('');
-    }
-    document.addEventListener('DOMContentLoaded', function() {
-        populateDropdown('/api/events/departments/all', 'event-department');
-        populateDropdown('/api/events/organizations/all', 'event-organization');
+    document.addEventListener('DOMContentLoaded', async () => {
+        setPageTitle('Create Event');
+        // Fetch departments and organizations for dropdowns
+        async function populateDropdown(url, selectId) {
+            const res = await fetch(url);
+            const data = await res.json();
+            const select = document.getElementById(selectId);
+            select.innerHTML = '<option value="">Select</option>' + data.map(item => `<option value="${item._id}">${item.name}</option>`).join('');
+        }
+        const token = localStorage.getItem('token');
+        let user = null;
+        if (token) {
+            try {
+                const res = await fetch('/api/auth/me', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (res.ok) {
+                    user = await res.json();
+                }
+            } catch (e) { /* ignore */ }
+        }
+
         // Show/hide department/org dropdowns based on category
         document.getElementById('event-category').addEventListener('change', function() {
             document.getElementById('department-select-container').classList.add('hidden');
@@ -228,6 +241,34 @@
                 document.getElementById('organization-select-container').classList.remove('hidden');
             }
         });
+
+        // Populate department/org dropdowns
+        if (user && user.role === 'student_leader') {
+            // Student leader: only show their department/org
+            if (user.isDepartmentLeader && user.department) {
+                const deptSelect = document.getElementById('event-department');
+                deptSelect.innerHTML = `<option value="${user.department._id || user.department}">${user.department.name || user.department}</option>`;
+                deptSelect.disabled = true;
+            }
+            if (user.isOrganizationLeader && user.organization) {
+                const orgSelect = document.getElementById('event-organization');
+                orgSelect.innerHTML = `<option value="${user.organization._id || user.organization}">${user.organization.name || user.organization}</option>`;
+                orgSelect.disabled = true;
+            }
+        } else if (user && user.role === 'faculty') {
+            // Faculty: only show their department
+            if (user.department) {
+                const deptSelect = document.getElementById('event-department');
+                deptSelect.innerHTML = `<option value="${user.department._id || user.department}">${user.department.name || user.department}</option>`;
+                deptSelect.disabled = true;
+            }
+            // Organization dropdown remains unrestricted for faculty
+            await populateDropdown('/api/events/organizations/all', 'event-organization');
+        } else {
+            // Not a student leader or faculty: show all
+            await populateDropdown('/api/events/departments/all', 'event-department');
+            await populateDropdown('/api/events/organizations/all', 'event-organization');
+        }
 
         // Image upload logic
         const dropzone = document.getElementById('event-image-dropzone');

@@ -4,6 +4,7 @@ const jwt = require('jsonwebtoken');
 const { body, validationResult } = require('express-validator');
 const User = require('../models/User');
 const { auth } = require('../middleware/auth');
+const mongoose = require('mongoose');
 
 // Register new user
 router.post('/register', [
@@ -12,7 +13,8 @@ router.post('/register', [
     body('password').isLength({ min: 6 }),
     body('fullName').trim().notEmpty(),
     body('department').trim().notEmpty(),
-    body('role').isIn(['student', 'teacher', 'admin'])
+    body('role').isIn(['student', 'faculty', 'admin', 'student_leader']),
+    body('organization').optional().isMongoId()
 ], async (req, res) => {
     try {
         const errors = validationResult(req);
@@ -20,7 +22,7 @@ router.post('/register', [
             return res.status(400).json({ errors: errors.array() });
         }
 
-        const { username, email, password, fullName, department, role } = req.body;
+        const { username, email, password, fullName, department, role, organization } = req.body;
 
         // Check if user already exists
         const existingUser = await User.findOne({ $or: [{ email }, { username }] });
@@ -29,16 +31,29 @@ router.post('/register', [
         }
 
         // Create new user
-        const user = new User({
+        const userData = {
             username,
             email,
             password,
             fullName,
             department,
             role
-        });
+        };
+        if (organization) userData.organization = organization;
+
+        // Force ObjectId conversion
+        if (userData.department) userData.department = new mongoose.Types.ObjectId(userData.department);
+        if (userData.organization) userData.organization = new mongoose.Types.ObjectId(userData.organization);
+
+        // Log what will be saved
+        console.log('userData to be saved:', userData);
+
+        const user = new User(userData);
 
         await user.save();
+
+        // Log what was saved
+        console.log('Saved user:', user);
 
         // Generate JWT token
         const token = jwt.sign(
@@ -55,10 +70,12 @@ router.post('/register', [
                 email: user.email,
                 role: user.role,
                 fullName: user.fullName,
-                department: user.department
+                department: user.department,
+                organization: user.organization
             }
         });
     } catch (error) {
+        console.error('Registration error:', error);
         res.status(500).json({ message: 'Server error' });
     }
 });
