@@ -515,7 +515,33 @@
                     e.preventDefault();
                     const href = link.getAttribute('href');
                     const page = href.replace('.html', '');
-                    window.location.hash = page;
+                    
+                    // Update hash without triggering hashchange
+                    history.replaceState(null, '', '#' + page);
+                    
+                    // Update iframe src
+                    const contentFrame = document.getElementById('content-frame');
+                    if (contentFrame) {
+                        contentFrame.src = href;
+                    }
+                    
+                    // Update active states
+                    document.querySelectorAll('.zoom-link').forEach(l => {
+                        if (l.getAttribute('href').includes(page)) {
+                            l.classList.add('active');
+                        } else {
+                            l.classList.remove('active');
+                        }
+                    });
+                    
+                    // Update bottom nav active state
+                    document.querySelectorAll('.bottom-nav-item').forEach(item => {
+                        if (item.getAttribute('href').includes(page)) {
+                            item.classList.add('active');
+                        } else {
+                            item.classList.remove('active');
+                        }
+                    });
                 });
             });
         });

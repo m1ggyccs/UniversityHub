@@ -6,21 +6,29 @@ const auth = async (req, res, next) => {
         const token = req.header('Authorization')?.replace('Bearer ', '');
         
         if (!token) {
-            throw new Error();
+            return res.status(401).json({ message: 'No authentication token provided.' });
         }
 
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        const user = await User.findOne({ _id: decoded.userId });
+        try {
+            const decoded = jwt.verify(token, process.env.JWT_SECRET);
+            const user = await User.findOne({ _id: decoded.userId });
 
-        if (!user) {
-            throw new Error();
+            if (!user) {
+                return res.status(401).json({ message: 'User not found.' });
+            }
+
+            req.user = user;
+            req.token = token;
+            next();
+        } catch (jwtError) {
+            if (jwtError.name === 'TokenExpiredError') {
+                return res.status(401).json({ message: 'Token has expired. Please log in again.' });
+            }
+            return res.status(401).json({ message: 'Invalid authentication token.' });
         }
-
-        req.user = user;
-        req.token = token;
-        next();
     } catch (error) {
-        res.status(401).json({ message: 'Please authenticate.' });
+        console.error('Auth middleware error:', error);
+        res.status(500).json({ message: 'Server error during authentication.' });
     }
 };
 
@@ -32,7 +40,8 @@ const checkRole = (roles) => {
             }
             next();
         } catch (error) {
-            res.status(500).json({ message: 'Server error' });
+            console.error('Role check error:', error);
+            res.status(500).json({ message: 'Server error during role verification.' });
         }
     };
 };
@@ -44,7 +53,8 @@ const checkDepartmentLeader = async (req, res, next) => {
         }
         next();
     } catch (error) {
-        res.status(500).json({ message: 'Server error' });
+        console.error('Department leader check error:', error);
+        res.status(500).json({ message: 'Server error during permission verification.' });
     }
 };
 
@@ -55,7 +65,8 @@ const checkOrganizationLeader = async (req, res, next) => {
         }
         next();
     } catch (error) {
-        res.status(500).json({ message: 'Server error' });
+        console.error('Organization leader check error:', error);
+        res.status(500).json({ message: 'Server error during permission verification.' });
     }
 };
 

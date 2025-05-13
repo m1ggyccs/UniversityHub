@@ -8,6 +8,9 @@ window.setPageTitle = setPageTitle;
 
 // Navigate within the SPA
 function navigateTo(page) {
+    // Remove .html extension if present
+    page = page.replace('.html', '');
+    
     // If we're in the iframe
     if (window !== window.top) {
         window.top.location.href = '/index.html#' + page;
