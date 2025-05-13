@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Event List - School Event Management</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+
+<body class="bg-gray-50">
+    <div class="container mx-auto px-4 py-6">
+        <!-- Page Header -->
+        <div class="mb-6">
+            <h1 class="text-2xl font-bold text-gray-800">Event List</h1>
+            <p class="text-gray-600">Browse, filter, and manage all upcoming and past events</p>
+        </div>
+
+        <!-- Search and Filter Bar -->
+        <div class="bg-white rounded-lg shadow-sm p-4 flex flex-col md:flex-row items-center justify-between mb-6">
+            <div class="relative w-full md:w-1/2 mb-4 md:mb-0">
+                <span class="absolute inset-y-0 left-0 pl-3 flex items-center">
+                    <i class="fas fa-search text-gray-400"></i>
+                </span>
+                <input type="text" placeholder="Search events..." class="form-input pl-10">
+            </div>
+            <div class="flex flex-wrap gap-2" id="event-filters">
+                <button class="btn btn-secondary active-filter" data-filter="all">
+                    <span class="mr-2">All</span>
+                    <span class="filter-count" id="count-all"></span>
+                </button>
+                <button class="btn btn-secondary" data-filter="upcoming">
+                    <span class="mr-2">Upcoming</span>
+                    <span class="filter-count" id="count-upcoming"></span>
+                </button>
+                <button class="btn btn-secondary" data-filter="today">
+                    <span class="mr-2">Today</span>
+                    <span class="filter-count" id="count-today"></span>
+                </button>
+                <button class="btn btn-secondary" data-filter="past">
+                    <span class="mr-2">Past</span>
+                    <span class="filter-count" id="count-past"></span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Category Filter Tabs -->
+        <div class="bg-white rounded-lg shadow-sm mb-6">
+            <div class="border-b border-gray-200">
+                <nav class="flex -mb-px overflow-x-auto" aria-label="Categories" id="category-tabs">
+                    <!-- Category buttons will be rendered here by JS -->
+                </nav>
+            </div>
+        </div>
+
+        <!-- Events Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="events-list"></div>
+
+        <!-- Pagination -->
+        <div class="mt-8 flex items-center justify-between bg-white p-4 rounded-lg shadow-sm">
+            <button class="btn btn-secondary">
+                <i class="fas fa-chevron-left mr-2"></i>
+                Previous
+            </button>
+            <div class="hidden md:flex gap-1">
+                <button
+                    class="h-8 w-8 text-sm flex items-center justify-center rounded bg-indigo-600 text-white">1</button>
+                <button class="h-8 w-8 text-sm flex items-center justify-center rounded hover:bg-gray-100">2</button>
+                <button class="h-8 w-8 text-sm flex items-center justify-center rounded hover:bg-gray-100">3</button>
+                <button class="h-8 w-8 text-sm flex items-center justify-center rounded hover:bg-gray-100">4</button>
+                <button class="h-8 w-8 text-sm flex items-center justify-center rounded hover:bg-gray-100">5</button>
+                <span class="h-8 w-8 text-sm flex items-center justify-center">...</span>
+                <button class="h-8 w-8 text-sm flex items-center justify-center rounded hover:bg-gray-100">12</button>
+            </div>
+            <button class="btn btn-secondary">
+                Next
+                <i class="fas fa-chevron-right ml-2"></i>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Simple toggle for filter buttons
+        document.querySelectorAll('.btn-secondary').forEach(button => {
+            button.addEventListener('click', function () {
+                // Remove active class from all buttons
+                document.querySelectorAll('.btn-secondary').forEach(btn => {
+                    btn.classList.remove('active-filter');
+                });
+                // Add active class to clicked button
+                this.classList.add('active-filter');
+            });
+        });
+
+        // Render category tabs dynamically
+        fetch('http://localhost:3000/api/categories')
+          .then(res => res.json())
+          .then(categories => {
+            const nav = document.getElementById('category-tabs');
+            if (!nav) return;
+            nav.innerHTML = '';
+            // All Categories button
+            const allBtn = document.createElement('button');
+            allBtn.className = 'text-gray-600 whitespace-nowrap py-4 px-6 border-b-2 border-indigo-500 font-medium text-sm';
+            allBtn.textContent = 'All Categories';
+            allBtn.onclick = function() {
+              document.querySelectorAll('#category-tabs button').forEach(b => b.classList.remove('border-indigo-500'));
+              this.classList.add('border-indigo-500');
+              fetchEvents();
+            };
+            nav.appendChild(allBtn);
+            // Static category buttons
+            const staticCategories = [
+              { name: 'School', value: 'school' },
+              { name: 'Department', value: 'department' },
+              { name: 'Organization', value: 'organization' }
+            ];
+            staticCategories.forEach(cat => {
+              const btn = document.createElement('button');
+              btn.className = 'text-gray-600 whitespace-nowrap py-4 px-6 border-b-2 border-transparent hover:border-gray-300 font-medium text-sm';
+              btn.textContent = cat.name;
+              btn.onclick = function() {
+                document.querySelectorAll('#category-tabs button').forEach(b => b.classList.remove('border-indigo-500'));
+                this.classList.add('border-indigo-500');
+                fetchEvents(cat.value);
+              };
+              nav.appendChild(btn);
+            });
+            // Dynamic category buttons
+            categories.forEach((cat, idx) => {
+              const btn = document.createElement('button');
+              btn.className = 'text-gray-600 whitespace-nowrap py-4 px-6 border-b-2 border-transparent hover:border-gray-300 font-medium text-sm';
+              btn.textContent = cat.name;
+              btn.onclick = function() {
+                document.querySelectorAll('#category-tabs button').forEach(b => b.classList.remove('border-indigo-500'));
+                this.classList.add('border-indigo-500');
+                fetchEvents(cat.name);
+              };
+              nav.appendChild(btn);
+            });
+          });
+    </script>
+    <script src="../js/events.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Event Details - School Event Management</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+
+<body class="bg-gray-50">
+  <div class="container mx-auto px-4 py-6">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+      <!-- Left Column: Event Info + QR -->
+      <div class="flex flex-col">
+        <div class="bg-white rounded-lg shadow-sm p-6 mb-6 flex-1">
+          <div class="flex items-center justify-between">
+            <div>
+              <h1 class="text-2xl font-bold text-gray-800" id="event-title">Event Details</h1>
+              <p class="text-gray-600 mt-1" id="event-category"></p>
+            </div>
+            <div>
+              <a href="event-list.html" class="btn btn-secondary">
+                <i class="fas fa-arrow-left mr-2"></i>Back to Event List
+              </a>
+            </div>
+          </div>
+          <p class="mb-2"><span class="font-medium">Description:</span> <span id="event-description"></span></p>
+          <p class="mb-2"><span class="font-medium">Date:</span> <span id="event-date"></span></p>
+          <p class="mb-2"><span class="font-medium">Time:</span> <span id="event-time"></span></p>
+          <p class="mb-2"><span class="font-medium">Location:</span> <span id="event-location"></span></p>
+          <p class="mb-2"><span class="font-medium">Category:</span> <span id="event-category-detail"></span></p>
+          <p class="mb-2"><span class="font-medium">Department:</span> <span id="event-department"></span></p>
+          <p class="mb-2"><span class="font-medium">Status:</span> <span id="event-status"></span></p>
+          <p class="mb-2"><span class="font-medium">Organizer:</span> <span id="event-organizer"></span></p>
+          <p class="mb-2"><span class="font-medium">Email:</span> <span id="event-organizer-email"></span></p>
+          <p class="mb-2"><span class="font-medium">Participants:</span> <span id="event-participants"></span></p>
+          <p class="mb-2"><span class="font-medium">Max Participants:</span> <span id="event-max-participants"></span></p>
+        </div>
+        <div class="bg-white rounded-lg shadow-sm p-6">
+          <h2 class="text-lg font-semibold text-gray-800 mb-2">Event QR Code</h2>
+          <div class="flex justify-center items-center">
+            <div id="event-qr" class="w-32 h-32 max-w-full"></div>
+          </div>
+        </div>
+      </div>
+      <!-- Right Column: Pubmat -->
+      <div class="bg-white rounded-lg shadow-sm p-6 flex items-center justify-center min-h-[300px]">
+        <img id="event-pubmat" src="" alt="Event Pubmat" class="max-h-96 rounded shadow hidden" />
+      </div>
+    </div>
+  </div>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="../js/jquery.qrcode.min.js"></script>
+  <script>
+  // Helper to get query param
+  function getQueryParam(name) {
+    const url = new URL(window.location.href);
+    return url.searchParams.get(name);
+  }
+  // Format date
+  function formatDate(dateStr) {
+    if (!dateStr) return '';
+    const d = new Date(dateStr);
+    return d.toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
+  }
+  // Fetch and display event details
+  async function loadEventDetails() {
+    const eventId = getQueryParam('id');
+    if (!eventId) {
+      alert('No event ID provided.');
+      return;
+    }
+    try {
+      const res = await fetch(`/api/events/${eventId}`);
+      if (!res.ok) throw new Error('Event not found');
+      const event = await res.json();
+      document.getElementById('event-title').textContent = event.title;
+      document.getElementById('event-description').textContent = event.description;
+      document.getElementById('event-date').textContent = formatDate(event.date);
+      document.getElementById('event-time').textContent = event.time;
+      document.getElementById('event-location').textContent = event.location;
+      document.getElementById('event-category').textContent = event.category ? event.category.charAt(0).toUpperCase() + event.category.slice(1) : '';
+      document.getElementById('event-category-detail').textContent = event.category;
+      document.getElementById('event-status').textContent = event.status;
+      document.getElementById('event-max-participants').textContent = event.maxParticipants;
+      document.getElementById('event-participants').textContent = event.participants && event.participants.length ? event.participants.length : 0;
+      document.getElementById('event-organizer').textContent = event.organizer && (event.organizer.fullName || event.organizer.username || event.organizer.email || event.organizer._id) ? (event.organizer.fullName || event.organizer.username || event.organizer.email || event.organizer._id) : 'N/A';
+      document.getElementById('event-organizer-email').textContent = event.organizer && event.organizer.email ? event.organizer.email : 'N/A';
+      document.getElementById('event-department').textContent = event.department && event.department.name ? event.department.name : 'N/A';
+      // Show pubmat if present
+      if (event.pubmat) {
+        const pubmatImg = document.getElementById('event-pubmat');
+        pubmatImg.src = event.pubmat;
+        pubmatImg.classList.remove('hidden');
+      }
+      // Generate QR code for the registration link (smaller size)
+      if (event.customRegistrationLink) {
+        $('#event-qr').empty().qrcode({ width: 128, height: 128, text: event.customRegistrationLink });
+      } else {
+        // Default registration link
+        const regUrl = window.location.origin + '/event-register.html?id=' + eventId;
+        $('#event-qr').empty().qrcode({ width: 128, height: 128, text: regUrl });
+      }
+    } catch (err) {
+      alert('Failed to load event details.');
+    }
+  }
+  window.addEventListener('DOMContentLoaded', loadEventDetails);
+  </script>
+</body>
+
+</html>
