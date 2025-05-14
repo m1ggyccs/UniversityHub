@@ -231,42 +231,72 @@
             } catch (e) { /* ignore */ }
         }
 
-        // Show/hide department/org dropdowns based on category
-        document.getElementById('event-category').addEventListener('change', function() {
-            document.getElementById('department-select-container').classList.add('hidden');
-            document.getElementById('organization-select-container').classList.add('hidden');
-            if (this.value === 'department') {
-                document.getElementById('department-select-container').classList.remove('hidden');
-            } else if (this.value === 'organization') {
-                document.getElementById('organization-select-container').classList.remove('hidden');
-            }
-        });
-
         // Populate department/org dropdowns
         if (user && user.role === 'student_leader') {
-            // Student leader: only show their department/org
-            if (user.department) {
-                const deptSelect = document.getElementById('event-department');
+            // Student leader: handle department and organization permissions
+            const categorySelect = document.getElementById('event-category');
+            const deptSelect = document.getElementById('event-department');
+            const orgSelect = document.getElementById('event-organization');
+            
+            // Reset category options
+            categorySelect.innerHTML = '<option value="">Select a category</option>';
+            
+            let hasMultipleRoles = false;
+            
+            // Add available categories based on permissions
+            if (user.isDepartmentLeader) {
+                categorySelect.innerHTML += '<option value="department">Department</option>';
+                
+                // Set up department select
                 const deptName = typeof user.department === 'object' ? user.department.name : user.department;
                 const deptId = typeof user.department === 'object' ? user.department._id : user.department;
-                
                 deptSelect.innerHTML = `<option value="${deptId}">${deptName}</option>`;
                 deptSelect.disabled = true;
-                
-                // Automatically select department category and show department field
-                const categorySelect = document.getElementById('event-category');
-                categorySelect.value = 'department';
-                document.getElementById('department-select-container').classList.remove('hidden');
-                categorySelect.disabled = true; // Prevent changing category
             }
             
-            if (user.organization) {
-                const orgSelect = document.getElementById('event-organization');
+            if (user.isOrganizationLeader || user.organization) {
+                categorySelect.innerHTML += '<option value="organization">Organization</option>';
+                
+                // Set up organization select
                 const orgName = typeof user.organization === 'object' ? user.organization.name : user.organization;
                 const orgId = typeof user.organization === 'object' ? user.organization._id : user.organization;
-                
                 orgSelect.innerHTML = `<option value="${orgId}">${orgName}</option>`;
                 orgSelect.disabled = true;
+            }
+            
+            // Check if user has multiple roles
+            hasMultipleRoles = (user.isDepartmentLeader && (user.isOrganizationLeader || user.organization));
+            
+            // If user has only one role, automatically select and disable the category
+            if (!hasMultipleRoles) {
+                if (user.isDepartmentLeader) {
+                    categorySelect.value = 'department';
+                    document.getElementById('department-select-container').classList.remove('hidden');
+                } else if (user.isOrganizationLeader || user.organization) {
+                    categorySelect.value = 'organization';
+                    document.getElementById('organization-select-container').classList.remove('hidden');
+                }
+                categorySelect.disabled = true;
+            } else {
+                // Enable category selection if user has multiple roles
+                categorySelect.disabled = false;
+                
+                // Add change event listener for category
+                categorySelect.addEventListener('change', function() {
+                    const deptContainer = document.getElementById('department-select-container');
+                    const orgContainer = document.getElementById('organization-select-container');
+                    
+                    if (this.value === 'department') {
+                        deptContainer.classList.remove('hidden');
+                        orgContainer.classList.add('hidden');
+                    } else if (this.value === 'organization') {
+                        orgContainer.classList.remove('hidden');
+                        deptContainer.classList.add('hidden');
+                    } else {
+                        deptContainer.classList.add('hidden');
+                        orgContainer.classList.add('hidden');
+                    }
+                });
             }
         } else if (user && user.role === 'faculty') {
             // Faculty: only show their department
@@ -332,69 +362,79 @@
     const form = document.querySelector('form');
     const registrationInfo = document.getElementById('event-registration-info');
     const registrationLink = document.getElementById('event-registration-link');
+    let isSubmitting = false; // Flag to prevent duplicate submissions
 
     form.addEventListener('submit', async function(e) {
         e.preventDefault();
         
-        // Get the JWT token from localStorage
-        const token = localStorage.getItem('token');
-        if (!token) {
-            alert('Please log in to create an event');
-            window.location.href = '/login.html';
+        // Prevent duplicate submissions
+        if (isSubmitting) {
             return;
         }
+        isSubmitting = true;
 
-        // Decode the token to get the user ID
-        const decoded = jwt_decode(token);
-        const organizerId = decoded.userId || decoded.id || decoded._id; // Try common keys
+        try {
+            // Get the JWT token from localStorage
+            const token = localStorage.getItem('token');
+            if (!token) {
+                alert('Please log in to create an event');
+                window.location.href = '/login.html';
+                return;
+            }
 
-        // Log token for debugging (remove in production)
-        console.log('Token exists:', !!token);
-        console.log('Decoded token:', decoded);
-        console.log('Organizer ID:', organizerId);
+            // Decode the token to get the user ID
+            const decoded = jwt_decode(token);
+            const organizerId = decoded.userId || decoded.id || decoded._id;
 
-        // Gather form data
-        const data = {
-            title: document.getElementById('event-name').value,
-            category: document.getElementById('event-category').value,
-            date: new Date(document.getElementById('event-date').value).toISOString(),
-            time: document.getElementById('event-start-time').value + ' - ' + document.getElementById('event-end-time').value,
-            location: document.getElementById('event-location').value,
-            maxParticipants: parseInt(document.getElementById('event-capacity').value) || 0,
-            description: document.getElementById('event-description').value,
-            organizer: organizerId
-        };
-
-        // Add department/organization if selected
-        const category = document.getElementById('event-category').value;
-        if (category === 'department') {
-            const dept = document.getElementById('event-department').value;
-            if (dept) data.department = dept;
-        } else if (category === 'organization') {
-            const org = document.getElementById('event-organization').value;
-            if (org) data.organization = org;
-        }
-
-        // Handle pubmat upload as base64
-        const imageInput = document.getElementById('event-image');
-        if (imageInput.files && imageInput.files[0]) {
-            const reader = new FileReader();
-            reader.onload = async function(e) {
-                data.pubmat = e.target.result; // base64 string
-                await submitEvent(data, token);
+            // Gather form data
+            const data = {
+                title: document.getElementById('event-name').value,
+                category: document.getElementById('event-category').value,
+                date: new Date(document.getElementById('event-date').value).toISOString(),
+                time: document.getElementById('event-start-time').value + ' - ' + document.getElementById('event-end-time').value,
+                location: document.getElementById('event-location').value,
+                maxParticipants: parseInt(document.getElementById('event-capacity').value) || 0,
+                description: document.getElementById('event-description').value,
+                organizer: organizerId
             };
-            reader.readAsDataURL(imageInput.files[0]);
-            return;
-        }
 
-        await submitEvent(data, token);
+            // Add department/organization if selected
+            const category = document.getElementById('event-category').value;
+            if (category === 'department') {
+                const dept = document.getElementById('event-department').value;
+                if (dept) data.department = dept;
+            } else if (category === 'organization') {
+                const org = document.getElementById('event-organization').value;
+                if (org) data.organization = org;
+            }
+
+            // Add custom registration link if provided
+            const customLink = document.getElementById('custom-registration-link').value.trim();
+            if (customLink) {
+                data.customRegistrationLink = customLink;
+            }
+
+            // Handle image upload if present
+            const imageInput = document.getElementById('event-image');
+            if (imageInput.files && imageInput.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    data.pubmat = e.target.result; // base64 string
+                    submitEventData(data, token);
+                };
+                reader.readAsDataURL(imageInput.files[0]);
+            } else {
+                // Submit without image
+                await submitEventData(data, token);
+            }
+        } catch (error) {
+            console.error('Error creating event:', error);
+            alert('Failed to create event. Please try again.');
+            isSubmitting = false;
+        }
     });
 
-    async function submitEvent(data, token) {
-        const customLink = document.getElementById('custom-registration-link').value.trim();
-        if (customLink) {
-            data.customRegistrationLink = customLink;
-        }
+    async function submitEventData(data, token) {
         try {
             // Send POST request to backend
             const res = await fetch('/api/events', {
@@ -417,20 +457,29 @@
                 $('#event-registration-qr').empty().qrcode(regUrl);
                 
                 // If custom registration link is provided, generate QR code for it
-                if (customLink) {
-                    registrationLink.href = customLink;
-                    registrationLink.textContent = customLink;
-                    $('#event-registration-qr').empty().qrcode(customLink);
+                if (data.customRegistrationLink) {
+                    registrationLink.href = data.customRegistrationLink;
+                    registrationLink.textContent = data.customRegistrationLink;
+                    $('#event-registration-qr').empty().qrcode(data.customRegistrationLink);
                 }
                 
                 registrationInfo.classList.remove('hidden');
                 window.scrollTo({ top: registrationInfo.offsetTop, behavior: 'smooth' });
+
+                // Reset form and submission flag
+                form.reset();
+                const previewImg = document.getElementById('event-image-preview');
+                const dropzoneContent = document.getElementById('event-image-dropzone-content');
+                previewImg.classList.add('hidden');
+                dropzoneContent.classList.remove('hidden');
+                
+                // Show success message
+                alert('Event created successfully!');
             } else {
                 const error = await res.json();
                 if (res.status === 401) {
-                    // Handle unauthorized error
                     alert('Your session has expired. Please log in again.');
-                    localStorage.removeItem('token'); // Clear invalid token
+                    localStorage.removeItem('token');
                     window.location.href = '/login.html';
                 } else {
                     alert('Failed to create event: ' + (error.message || 'Please check your input'));
@@ -439,6 +488,8 @@
         } catch (error) {
             console.error('Error:', error);
             alert('Failed to create event. Please try again.');
+        } finally {
+            isSubmitting = false;
         }
     }
     </script>

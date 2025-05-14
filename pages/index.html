@@ -363,6 +363,7 @@
 
         // Update menu visibility based on user role
         function updateMenuVisibility(role) {
+            // Admin elements
             const adminElements = [
                 document.getElementById('approve-events-link'),
                 document.getElementById('admin-management-link'),
@@ -372,11 +373,23 @@
             
             adminElements.forEach(element => {
                 if (element) {
-                    element.style.display = (role === 'admin' || role === 'superadmin') ? 'flex' : 'none';
+                    element.style.display = (role === 'admin') ? 'flex' : 'none';
                 }
             });
 
-            // Handle Create Event button visibility
+            // Faculty elements
+            const facultyElements = [
+                document.getElementById('faculty-events-link'),
+                document.getElementById('mobile-faculty-events-link')
+            ];
+
+            facultyElements.forEach(element => {
+                if (element) {
+                    element.style.display = (role === 'faculty' || role === 'admin') ? 'flex' : 'none';
+                }
+            });
+
+            // Create Event button visibility
             const createEventElements = [
                 document.getElementById('create-event-link'),
                 document.getElementById('mobile-create-event-link')
@@ -386,6 +399,19 @@
                 if (element) {
                     // Show Create Event button for admin, faculty, and student_leader roles
                     element.style.display = (role === 'admin' || role === 'faculty' || role === 'student_leader') ? 'flex' : 'none';
+                }
+            });
+
+            // Event approval elements
+            const approvalElements = [
+                document.getElementById('approve-events-link'),
+                document.getElementById('mobile-approve-events-link')
+            ];
+
+            approvalElements.forEach(element => {
+                if (element) {
+                    // Show approval elements for both admin and faculty
+                    element.style.display = (role === 'admin' || role === 'faculty') ? 'flex' : 'none';
                 }
             });
         }

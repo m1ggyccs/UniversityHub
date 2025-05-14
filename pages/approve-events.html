@@ -127,13 +127,36 @@
                     return false;
                 });
 
-                // Further restrict for faculty: only show events from their department
-                if (currentUser && currentUser.role === 'faculty' && currentUser.department) {
-                    filteredEvents = filteredEvents.filter(event => event.department && event.department._id === currentUser.department._id);
+                // Further filter events based on user role and permissions
+                if (currentUser && currentUser.role === 'faculty') {
+                    filteredEvents = filteredEvents.filter(event => {
+                        // Faculty can see:
+                        // 1. Events from their own department
+                        if (event.department && event.department._id === currentUser.department._id) {
+                            return true;
+                        }
+                        // 2. Organization events from student leaders
+                        if (event.category === 'organization' && 
+                            event.organizer && 
+                            event.organizer.role === 'student_leader') {
+                            return true;
+                        }
+                        return false;
+                    });
                 }
 
-                const eventsList = document.getElementById('events-list');
-                eventsList.innerHTML = filteredEvents.map(event => `
+                // Render the filtered events
+                const eventsContainer = document.getElementById('events-list');
+                if (filteredEvents.length === 0) {
+                    eventsContainer.innerHTML = `
+                        <div class="text-center py-8">
+                            <p class="text-gray-500">No ${currentTab} events found</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                eventsContainer.innerHTML = filteredEvents.map(event => `
                     <tr>
                         <td class="px-6 py-4 whitespace-nowrap">
                             <div class="text-sm font-medium text-gray-900">${event.title}</div>
@@ -165,6 +188,7 @@
                 `).join('');
             } catch (error) {
                 console.error('Error loading events:', error);
+                showNotification('Error loading events', 'error');
             }
         }
 

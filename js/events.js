@@ -36,7 +36,10 @@ function filterEventsByDate(events, filterType) {
   const tomorrow = new Date(today);
   tomorrow.setDate(tomorrow.getDate() + 1);
 
-  return events.filter(event => {
+  // Only work with approved events
+  const approvedEvents = events.filter(event => event.status === 'approved');
+
+  return approvedEvents.filter(event => {
     const eventDate = new Date(event.date);
     switch (filterType) {
       case 'upcoming':
@@ -214,88 +217,66 @@ function updateURL() {
 // Fetch and display events based on current state
 function fetchEvents(newState = {}) {
   // Update state with new values while preserving existing ones
-  Object.assign(currentState, newState);
+  currentState = { ...currentState, ...newState };
   
   // Update URL to reflect current state
   updateURL();
   
-  // Clear the events list and show loading state
+  // Show loading state
   const list = document.getElementById('events-list');
   if (list) {
-    list.innerHTML = '<div class="col-span-3 p-6 text-center text-gray-500">Loading events...</div>';
+    list.innerHTML = `
+      <div class="col-span-3 p-6 text-center text-gray-500">
+        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto mb-4"></div>
+        Loading events...
+      </div>
+    `;
   }
 
-  // Build the URL with all parameters
-  let url = new URL(`${BASE_URL}/api/events`);
-  let params = new URLSearchParams();
+  // Build the query string
+  const queryParams = new URLSearchParams({
+    page: currentState.page,
+    limit: currentState.itemsPerPage,
+    status: 'approved' // Always fetch only approved events for the event list
+  });
 
-  if (currentState.category && currentState.category !== 'All Categories') {
-    params.append('category', currentState.category);
+  if (currentState.category && currentState.category !== 'all') {
+    queryParams.append('category', currentState.category);
   }
-  if (currentState.date) {
-    params.append('date', currentState.date);
-  }
+
   if (currentState.searchTerm) {
-    params.append('search', currentState.searchTerm);
+    queryParams.append('search', currentState.searchTerm);
   }
 
-  url.search = params.toString();
-  console.log('Fetching events from:', url.toString());
-  
+  const url = `${BASE_URL}/api/events?${queryParams.toString()}`;
+
+  // Fetch events from API
   fetch(url)
-    .then(res => {
-      if (!res.ok) {
-        throw new Error(`Server returned ${res.status}: ${res.statusText}`);
-      }
-      return res.json();
-    })
-    .then(response => {
-      console.log('Received response:', response);
+    .then(response => response.json())
+    .then(events => {
+      // Filter events based on date
+      const filteredEvents = filterEventsByDate(events, currentState.filterType);
       
-      let events = [];
-      let totalEvents = 0;
-      
-      // Handle both array and paginated response formats
-      if (Array.isArray(response)) {
-        events = response;
-      } else if (response && response.events) {
-        events = response.events;
-      } else {
-        throw new Error('Invalid response format from server');
-      }
-
-      // Apply filters
-      if (currentState.searchTerm) {
-        events = filterEventsBySearch(events, currentState.searchTerm);
-      }
-      
-      events = filterEventsByDate(events, currentState.filterType);
-      totalEvents = events.length;
-
       // Update filter counts
       updateFilterCounts(events);
-
-      // Calculate start and end indices for current page
-      const startIndex = (currentState.page - 1) * currentState.itemsPerPage;
-      const endIndex = startIndex + currentState.itemsPerPage;
       
-      // Get events for current page
-      const eventsToShow = events.slice(startIndex, endIndex);
-
-      // Update the events list
+      // Clear the events list
       if (!list) return;
-      
-      // Clear previous content and set up grid
       list.innerHTML = '';
-      list.className = 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6';
-      
-      if (!eventsToShow || eventsToShow.length === 0) {
-        list.innerHTML = '<div class="col-span-3 p-6 text-center text-gray-500">No events found.</div>';
+
+      // If no events found
+      if (filteredEvents.length === 0) {
+        list.innerHTML = `
+          <div class="col-span-3 p-6 text-center text-gray-500">
+            <i class="fas fa-calendar-times text-4xl mb-4"></i>
+            <p>No events found</p>
+          </div>
+        `;
         return;
       }
 
       // Create event cards
-      eventsToShow.forEach(event => {
+      filteredEvents.forEach(event => {
         // Determine image: pubmat > logo > icon
         let imageHtml = '';
         if (event.pubmat) {
@@ -355,7 +336,7 @@ function fetchEvents(newState = {}) {
       });
 
       // Update pagination
-      updatePagination(totalEvents);
+      updatePagination(events.total, currentState.page, currentState.itemsPerPage);
       
       // Update active category
       document.querySelectorAll('#category-tabs button').forEach(button => {
@@ -372,18 +353,18 @@ function fetchEvents(newState = {}) {
 }
 
 // Update pagination controls based on total events
-function updatePagination(totalEvents) {
-  const totalPages = Math.ceil(totalEvents / currentState.itemsPerPage);
+function updatePagination(totalEvents, currentPage, itemsPerPage) {
+  const totalPages = Math.ceil(totalEvents / itemsPerPage);
   const prevButton = document.getElementById('prev-page');
   const nextButton = document.getElementById('next-page');
   const paginationNumbers = document.getElementById('pagination-numbers');
 
   // Update prev/next buttons
   if (prevButton) {
-    prevButton.disabled = currentState.page <= 1;
+    prevButton.disabled = currentPage <= 1;
   }
   if (nextButton) {
-    nextButton.disabled = currentState.page >= totalPages;
+    nextButton.disabled = currentPage >= totalPages;
   }
 
   // Update pagination numbers
@@ -391,7 +372,7 @@ function updatePagination(totalEvents) {
     paginationNumbers.innerHTML = '';
     
     // Calculate range of pages to show
-    let startPage = Math.max(1, currentState.page - 2);
+    let startPage = Math.max(1, currentPage - 2);
     let endPage = Math.min(totalPages, startPage + 4);
     
     // Adjust start if we're near the end
