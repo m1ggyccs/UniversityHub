@@ -24,24 +24,24 @@
                 <span class="absolute inset-y-0 left-0 pl-3 flex items-center">
                     <i class="fas fa-search text-gray-400"></i>
                 </span>
-                <input type="text" placeholder="Search events..." class="form-input pl-10">
+                <input type="text" id="search-input" placeholder="Search events..." class="form-input pl-10 w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
             </div>
             <div class="flex flex-wrap gap-2" id="event-filters">
                 <button class="btn btn-secondary active-filter" data-filter="all">
                     <span class="mr-2">All</span>
-                    <span class="filter-count" id="count-all"></span>
+                    <span class="filter-count" id="count-all">0</span>
                 </button>
                 <button class="btn btn-secondary" data-filter="upcoming">
                     <span class="mr-2">Upcoming</span>
-                    <span class="filter-count" id="count-upcoming"></span>
+                    <span class="filter-count" id="count-upcoming">0</span>
                 </button>
                 <button class="btn btn-secondary" data-filter="today">
                     <span class="mr-2">Today</span>
-                    <span class="filter-count" id="count-today"></span>
+                    <span class="filter-count" id="count-today">0</span>
                 </button>
                 <button class="btn btn-secondary" data-filter="past">
                     <span class="mr-2">Past</span>
-                    <span class="filter-count" id="count-past"></span>
+                    <span class="filter-count" id="count-past">0</span>
                 </button>
             </div>
         </div>
@@ -56,96 +56,38 @@
         </div>
 
         <!-- Events Grid -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="events-list"></div>
+        <div id="events-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Loading state -->
+            <div class="col-span-3 p-6 text-center text-gray-500">
+                <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto mb-4"></div>
+                Loading events...
+            </div>
+        </div>
 
         <!-- Pagination -->
         <div class="mt-8 flex items-center justify-between bg-white p-4 rounded-lg shadow-sm">
-            <button class="btn btn-secondary">
+            <button class="btn btn-secondary" id="prev-page" disabled>
                 <i class="fas fa-chevron-left mr-2"></i>
                 Previous
             </button>
-            <div class="hidden md:flex gap-1">
-                <button
-                    class="h-8 w-8 text-sm flex items-center justify-center rounded bg-indigo-600 text-white">1</button>
-                <button class="h-8 w-8 text-sm flex items-center justify-center rounded hover:bg-gray-100">2</button>
-                <button class="h-8 w-8 text-sm flex items-center justify-center rounded hover:bg-gray-100">3</button>
-                <button class="h-8 w-8 text-sm flex items-center justify-center rounded hover:bg-gray-100">4</button>
-                <button class="h-8 w-8 text-sm flex items-center justify-center rounded hover:bg-gray-100">5</button>
-                <span class="h-8 w-8 text-sm flex items-center justify-center">...</span>
-                <button class="h-8 w-8 text-sm flex items-center justify-center rounded hover:bg-gray-100">12</button>
+            <div class="hidden md:flex gap-1" id="pagination-numbers">
+                <!-- Pagination numbers will be dynamically inserted here -->
             </div>
-            <button class="btn btn-secondary">
+            <button class="btn btn-secondary" id="next-page" disabled>
                 Next
                 <i class="fas fa-chevron-right ml-2"></i>
             </button>
         </div>
     </div>
 
-    <script src="../js/utils.js"></script>
+    <!-- Base URL Configuration -->
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            setPageTitle('Events');
-            // Simple toggle for filter buttons
-            document.querySelectorAll('.btn-secondary').forEach(button => {
-                button.addEventListener('click', function () {
-                    // Remove active class from all buttons
-                    document.querySelectorAll('.btn-secondary').forEach(btn => {
-                        btn.classList.remove('active-filter');
-                    });
-                    // Add active class to clicked button
-                    this.classList.add('active-filter');
-                });
-            });
-
-            // Render category tabs dynamically
-            fetch('http://localhost:3000/api/categories')
-              .then(res => res.json())
-              .then(categories => {
-                const nav = document.getElementById('category-tabs');
-                if (!nav) return;
-                nav.innerHTML = '';
-                // All Categories button
-                const allBtn = document.createElement('button');
-                allBtn.className = 'text-gray-600 whitespace-nowrap py-4 px-6 border-b-2 border-indigo-500 font-medium text-sm';
-                allBtn.textContent = 'All Categories';
-                allBtn.onclick = function() {
-                  document.querySelectorAll('#category-tabs button').forEach(b => b.classList.remove('border-indigo-500'));
-                  this.classList.add('border-indigo-500');
-                  fetchEvents();
-                };
-                nav.appendChild(allBtn);
-                // Static category buttons
-                const staticCategories = [
-                  { name: 'School', value: 'school' },
-                  { name: 'Department', value: 'department' },
-                  { name: 'Organization', value: 'organization' }
-                ];
-                staticCategories.forEach(cat => {
-                  const btn = document.createElement('button');
-                  btn.className = 'text-gray-600 whitespace-nowrap py-4 px-6 border-b-2 border-transparent hover:border-gray-300 font-medium text-sm';
-                  btn.textContent = cat.name;
-                  btn.onclick = function() {
-                    document.querySelectorAll('#category-tabs button').forEach(b => b.classList.remove('border-indigo-500'));
-                    this.classList.add('border-indigo-500');
-                    fetchEvents(cat.value);
-                  };
-                  nav.appendChild(btn);
-                    });
-                // Dynamic category buttons
-                categories.forEach((cat, idx) => {
-                  const btn = document.createElement('button');
-                  btn.className = 'text-gray-600 whitespace-nowrap py-4 px-6 border-b-2 border-transparent hover:border-gray-300 font-medium text-sm';
-                  btn.textContent = cat.name;
-                  btn.onclick = function() {
-                    document.querySelectorAll('#category-tabs button').forEach(b => b.classList.remove('border-indigo-500'));
-                    this.classList.add('border-indigo-500');
-                    fetchEvents(cat.name);
-                  };
-                  nav.appendChild(btn);
-                });
-            });
-        });
+        // Configure the API URL - update this based on your environment
+        window.API_URL = 'http://localhost:3000';
     </script>
+
+    <!-- Load dependencies -->
+    <script src="../js/utils.js"></script>
     <script src="../js/events.js"></script>
 </body>
 
