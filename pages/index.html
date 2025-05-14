@@ -220,6 +220,15 @@
                     </div>
                 </div>
 
+                <!-- Create Event Button for Mobile -->
+                <div class="px-2 mb-4">
+                    <a href="create-event.html" id="mobile-create-event-link"
+                        class="create-event-btn flex items-center justify-center px-4 py-2 rounded-lg text-sm font-medium">
+                        <i class="fas fa-plus mr-2"></i>
+                        Create Event
+                    </a>
+                </div>
+
                 <div class="space-y-2">
                     <a href="dashboard.html" class="zoom-link rounded-lg">
                         <i class="fas fa-th-large w-6"></i>
@@ -364,6 +373,19 @@
             adminElements.forEach(element => {
                 if (element) {
                     element.style.display = (role === 'admin' || role === 'superadmin') ? 'flex' : 'none';
+                }
+            });
+
+            // Handle Create Event button visibility
+            const createEventElements = [
+                document.getElementById('create-event-link'),
+                document.getElementById('mobile-create-event-link')
+            ];
+
+            createEventElements.forEach(element => {
+                if (element) {
+                    // Show Create Event button for admin, faculty, and student_leader roles
+                    element.style.display = (role === 'admin' || role === 'faculty' || role === 'student_leader') ? 'flex' : 'none';
                 }
             });
         }
