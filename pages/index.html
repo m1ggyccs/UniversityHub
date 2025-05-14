@@ -59,51 +59,6 @@
             transition: opacity 0.3s ease-in-out;
         }
         
-        /* Bottom navigation bar for mobile */
-        .bottom-nav {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: white;
-            border-top: 1px solid #e5e7eb;
-            display: flex;
-            justify-content: space-around;
-            padding: 0.5rem;
-            z-index: 40;
-        }
-        
-        .bottom-nav-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 0.5rem;
-            color: #6b7280;
-            font-size: 0.75rem;
-            min-width: 60px;
-        }
-        
-        .bottom-nav-item i {
-            font-size: 1.25rem;
-            margin-bottom: 0.25rem;
-        }
-        
-        .bottom-nav-item.active {
-            color: #4f46e5;
-        }
-        
-        /* Adjust main content padding for bottom navigation */
-        @media (max-width: 768px) {
-            main {
-                padding-bottom: 4rem !important;
-            }
-            
-            .mobile-menu nav {
-                height: calc(100vh - 60px);
-                overflow-y: auto;
-            }
-        }
-        
         /* Enhanced touch targets for mobile */
         @media (max-width: 768px) {
             .zoom-link {
@@ -114,6 +69,11 @@
             .mobile-menu-button, .close-menu-button {
                 padding: 0.75rem;
                 font-size: 1.5rem;
+            }
+            
+            .mobile-menu nav {
+                height: calc(100vh - 60px);
+                overflow-y: auto;
             }
         }
         
@@ -229,30 +189,6 @@
             <main class="flex-1 overflow-y-auto bg-gray-50 p-4">
                 <iframe id="content-frame" class="w-full h-full border-none" src="dashboard.html"></iframe>
             </main>
-
-            <!-- Bottom Navigation for Mobile -->
-            <div class="md:hidden bottom-nav">
-                <a href="dashboard.html" class="bottom-nav-item active">
-                    <i class="fas fa-th-large"></i>
-                    <span>Home</span>
-                </a>
-                <a href="event-list.html" class="bottom-nav-item">
-                    <i class="fas fa-calendar-alt"></i>
-                    <span>Events</span>
-                </a>
-                <a href="create-event.html" class="bottom-nav-item">
-                    <i class="fas fa-plus-circle"></i>
-                    <span>Create</span>
-                </a>
-                <a href="notifications.html" class="bottom-nav-item">
-                    <i class="fas fa-bell"></i>
-                    <span>Alerts</span>
-                </a>
-                <a href="profile.html" class="bottom-nav-item">
-                    <i class="fas fa-user"></i>
-                    <span>Profile</span>
-                </a>
-            </div>
         </div>
     </div>
 
@@ -359,20 +295,6 @@
             }
         });
 
-        // Bottom navigation handling
-        const bottomNavItems = document.querySelectorAll('.bottom-nav-item');
-        bottomNavItems.forEach(item => {
-            item.addEventListener('click', function(e) {
-                e.preventDefault();
-                bottomNavItems.forEach(i => i.classList.remove('active'));
-                this.classList.add('active');
-                const frame = document.getElementById('content-frame');
-                if (frame) {
-                    frame.src = this.getAttribute('href');
-                }
-            });
-        });
-
         // Handle mobile menu links with improved touch handling
         document.querySelectorAll('.mobile-menu .zoom-link').forEach(link => {
             link.addEventListener('click', function(e) {
@@ -382,13 +304,6 @@
                     frame.src = this.getAttribute('href');
                 }
                 closeMobileMenu();
-                
-                // Update bottom nav active state if applicable
-                const bottomNavItem = document.querySelector(`.bottom-nav-item[href="${this.getAttribute('href')}"]`);
-                if (bottomNavItem) {
-                    bottomNavItems.forEach(i => i.classList.remove('active'));
-                    bottomNavItem.classList.add('active');
-                }
             });
         });
 
@@ -491,15 +406,6 @@
                     link.classList.remove('active');
                 }
             });
-            
-            // Update bottom nav active state
-            document.querySelectorAll('.bottom-nav-item').forEach(item => {
-                if (item.getAttribute('href').includes(hash)) {
-                    item.classList.add('active');
-                } else {
-                    item.classList.remove('active');
-                }
-            });
         }
 
         // Listen for hash changes
@@ -510,7 +416,7 @@
             handleNavigation();
             
             // Update navigation when clicking links
-            document.querySelectorAll('.zoom-link, .bottom-nav-item').forEach(link => {
+            document.querySelectorAll('.zoom-link').forEach(link => {
                 link.addEventListener('click', (e) => {
                     e.preventDefault();
                     const href = link.getAttribute('href');
@@ -531,15 +437,6 @@
                             l.classList.add('active');
                         } else {
                             l.classList.remove('active');
-                        }
-                    });
-                    
-                    // Update bottom nav active state
-                    document.querySelectorAll('.bottom-nav-item').forEach(item => {
-                        if (item.getAttribute('href').includes(page)) {
-                            item.classList.add('active');
-                        } else {
-                            item.classList.remove('active');
                         }
                     });
                 });
