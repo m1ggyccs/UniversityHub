@@ -99,7 +99,7 @@
 
                 <!-- Create Event Button -->
                 <div class="px-4 py-4">
-                    <a href="create-event.html" id="create-event-link"
+                    <a href="#" onclick="navigateTo('create-event.html'); return false;" id="create-event-link"
                         class="create-event-btn flex items-center justify-center px-4 py-2 rounded-lg text-sm font-medium">
                         <i class="fas fa-plus mr-2"></i>
                         Create Event
@@ -222,7 +222,7 @@
 
                 <!-- Create Event Button for Mobile -->
                 <div class="px-2 mb-4">
-                    <a href="create-event.html" id="mobile-create-event-link"
+                    <a href="#" onclick="navigateTo('create-event.html'); closeMobileMenu(); return false;" id="mobile-create-event-link"
                         class="create-event-btn flex items-center justify-center px-4 py-2 rounded-lg text-sm font-medium">
                         <i class="fas fa-plus mr-2"></i>
                         Create Event
@@ -490,6 +490,14 @@
                 });
             });
         });
+
+        // Navigation function for iframe content
+        function navigateTo(page) {
+            const iframe = document.getElementById('content-frame');
+            if (iframe) {
+                iframe.src = page;
+            }
+        }
     </script>
 </body>
 </html>

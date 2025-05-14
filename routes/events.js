@@ -520,8 +520,8 @@ router.get('/', async (req, res) => {
         } else if (user.role === 'faculty') {
             // Faculty see:
             // 1. All approved events
-            // 2. Pending events from their department
-            // 3. Pending organization events (if they can approve them)
+            // 2. Pending events from their department (including student leader events)
+            // 3. Pending organization events
             query.$or = [
                 { status: 'approved' },
                 { 
@@ -539,7 +539,7 @@ router.get('/', async (req, res) => {
         }
 
         const events = await Event.find(query)
-            .populate('organizer', 'username email fullName')
+            .populate('organizer', 'username email fullName role department organization')
             .populate('department', 'name logo')
             .populate('organization', 'name logo')
             .sort({ date: 1 });
