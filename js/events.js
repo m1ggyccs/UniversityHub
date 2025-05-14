@@ -29,6 +29,43 @@ function showError(message) {
   }
 }
 
+// Filter events by date type (all, upcoming, today, past)
+function filterEventsByDate(events, filterType) {
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const tomorrow = new Date(today);
+  tomorrow.setDate(tomorrow.getDate() + 1);
+
+  return events.filter(event => {
+    const eventDate = new Date(event.date);
+    switch (filterType) {
+      case 'upcoming':
+        return eventDate >= today;
+      case 'today':
+        return eventDate >= today && eventDate < tomorrow;
+      case 'past':
+        return eventDate < today;
+      default:
+        return true;
+    }
+  });
+}
+
+// Filter events by search term
+function filterEventsBySearch(events, searchTerm) {
+  if (!searchTerm) return events;
+  
+  const searchLower = searchTerm.toLowerCase();
+  return events.filter(event => {
+    return (
+      (event.title && event.title.toLowerCase().includes(searchLower)) ||
+      (event.description && event.description.toLowerCase().includes(searchLower)) ||
+      (event.location && event.location.toLowerCase().includes(searchLower)) ||
+      (event.category && event.category.toLowerCase().includes(searchLower))
+    );
+  });
+}
+
 // Initialize the page
 function initializePage() {
   // Load initial state from URL parameters
@@ -39,8 +76,8 @@ function initializePage() {
   currentState.filterType = urlParams.get('filter') || 'all';
   currentState.searchTerm = urlParams.get('search') || '';
 
-  // Set up event listeners
-  const searchInput = document.querySelector('input[type="text"]');
+  // Set up search input
+  const searchInput = document.querySelector('#search-input');
   if (searchInput) {
     searchInput.value = currentState.searchTerm;
     searchInput.addEventListener('input', debounce((e) => {
@@ -51,6 +88,10 @@ function initializePage() {
   // Set up filter buttons
   document.querySelectorAll('[data-filter]').forEach(button => {
     button.addEventListener('click', () => {
+      document.querySelectorAll('[data-filter]').forEach(btn => {
+        btn.classList.remove('active-filter');
+      });
+      button.classList.add('active-filter');
       fetchEvents({ filterType: button.dataset.filter, page: 1 });
     });
   });
@@ -68,7 +109,6 @@ function initializePage() {
 
   // Load initial data
   loadCategories();
-  updateFilterCounts();
   fetchEvents();
 }
 
@@ -107,49 +147,6 @@ function loadCategories() {
     })
     .catch(error => {
       console.error('Error loading categories:', error);
-    });
-}
-
-// Update filter counts and highlight active filter
-function updateFilterCounts() {
-  fetch(`${BASE_URL}/api/events`)
-    .then(res => {
-      if (!res.ok) {
-        throw new Error(`HTTP error! status: ${res.status}`);
-      }
-      return res.json();
-    })
-    .then(events => {
-      const now = new Date();
-      const todayStr = now.toISOString().split('T')[0];
-      let countAll = events.length;
-      let countUpcoming = events.filter(ev => ev.date >= todayStr).length;
-      let countToday = events.filter(ev => ev.date === todayStr).length;
-      let countPast = events.filter(ev => ev.date < todayStr).length;
-      
-      // Update count badges
-      const countElements = {
-        'all': countAll,
-        'upcoming': countUpcoming,
-        'today': countToday,
-        'past': countPast
-      };
-      
-      Object.entries(countElements).forEach(([key, count]) => {
-        const element = document.getElementById(`count-${key}`);
-        if (element) {
-          element.textContent = count;
-          element.className = 'filter-count inline-flex items-center justify-center px-2 py-1 text-xs font-medium rounded-full bg-gray-100';
-        }
-      });
-
-      // Update active filter button
-      document.querySelectorAll('[data-filter]').forEach(button => {
-        button.classList.toggle('active-filter', button.dataset.filter === currentState.filterType);
-      });
-    })
-    .catch(error => {
-      console.error('Error updating filter counts:', error);
     });
 }
 
@@ -230,10 +227,7 @@ function fetchEvents(newState = {}) {
 
   // Build the URL with all parameters
   let url = new URL(`${BASE_URL}/api/events`);
-  let params = new URLSearchParams({
-    page: currentState.page,
-    limit: currentState.itemsPerPage
-  });
+  let params = new URLSearchParams();
 
   if (currentState.category && currentState.category !== 'All Categories') {
     params.append('category', currentState.category);
@@ -243,9 +237,6 @@ function fetchEvents(newState = {}) {
   }
   if (currentState.searchTerm) {
     params.append('search', currentState.searchTerm);
-  }
-  if (currentState.filterType && currentState.filterType !== 'all') {
-    params.append('filter', currentState.filterType);
   }
 
   url.search = params.toString();
@@ -267,13 +258,22 @@ function fetchEvents(newState = {}) {
       // Handle both array and paginated response formats
       if (Array.isArray(response)) {
         events = response;
-        totalEvents = response.length;
       } else if (response && response.events) {
         events = response.events;
-        totalEvents = response.totalEvents || events.length;
       } else {
         throw new Error('Invalid response format from server');
       }
+
+      // Apply filters
+      if (currentState.searchTerm) {
+        events = filterEventsBySearch(events, currentState.searchTerm);
+      }
+      
+      events = filterEventsByDate(events, currentState.filterType);
+      totalEvents = events.length;
+
+      // Update filter counts
+      updateFilterCounts(events);
 
       // Calculate start and end indices for current page
       const startIndex = (currentState.page - 1) * currentState.itemsPerPage;
@@ -356,9 +356,6 @@ function fetchEvents(newState = {}) {
 
       // Update pagination
       updatePagination(totalEvents);
-      
-      // Update filter counts
-      updateFilterCounts();
       
       // Update active category
       document.querySelectorAll('#category-tabs button').forEach(button => {
@@ -450,6 +447,40 @@ function createPaginationButton(pageNum) {
     }
   });
   return button;
+}
+
+// Update filter counts based on current events
+function updateFilterCounts(events) {
+  if (!events) return;
+
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const tomorrow = new Date(today);
+  tomorrow.setDate(tomorrow.getDate() + 1);
+
+  const counts = {
+    all: events.length,
+    upcoming: events.filter(event => new Date(event.date) >= today).length,
+    today: events.filter(event => {
+      const eventDate = new Date(event.date);
+      return eventDate >= today && eventDate < tomorrow;
+    }).length,
+    past: events.filter(event => new Date(event.date) < today).length
+  };
+
+  // Update count badges
+  Object.entries(counts).forEach(([key, count]) => {
+    const element = document.getElementById(`count-${key}`);
+    if (element) {
+      element.textContent = count;
+    }
+  });
+
+  // Update active filter button
+  document.querySelectorAll('[data-filter]').forEach(button => {
+    const isActive = button.dataset.filter === currentState.filterType;
+    button.classList.toggle('active-filter', isActive);
+  });
 }
 
 // Initialize the page when DOM is loaded
