@@ -1,5 +1,5 @@
 // Get the base URL from the environment or use a default
-const BASE_URL = window.API_URL || 'http://localhost:3000' || 'https://universityhub.onrender.com';
+const BASE_URL = 'https://universityhub.onrender.com/' || 'http://localhost:3000' || ;
 
 // Global state
 let currentState = {
