@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const dotenv = require('dotenv');
 const path = require('path');
-const uri = "mongodb+srv://mamdavid:03182526dave@universityhub.vm0vocq.mongodb.net/?retryWrites=true&w=majority&appName=universityhub";
+const uri = process.env.API_KEY;
 
 // Load environment variables
 dotenv.config();
