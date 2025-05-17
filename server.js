@@ -1,27 +1,23 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
-const dotenv = require('dotenv');
 const path = require('path');
-const uri = process.env.API_KEY;
-
-// Load environment variables
-dotenv.config();
+const config = require('./config');
 
 // Create Express app
 const app = express();
 
 // Middleware
 app.use(cors());
-app.use(express.json({ limit: '5mb' }));
-app.use(express.urlencoded({ extended: true, limit: '5mb' }));
+app.use(express.json({ limit: config.maxFileSize }));
+app.use(express.urlencoded({ extended: true, limit: config.maxFileSize }));
 app.use(express.static(path.join(__dirname, 'pages')));
 app.use('/js', express.static(path.join(__dirname, 'js')));
 app.use('/css', express.static(path.join(__dirname, 'css')));
 app.use('/assets', express.static(path.join(__dirname, 'assets')));
 
 // Database connection
-mongoose.connect(uri, {
+mongoose.connect(config.mongoUri, {
     useNewUrlParser: true,
     useUnifiedTopology: true
 })
@@ -46,9 +42,8 @@ app.use((err, req, res, next) => {
 });
 
 // Start server
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
+app.listen(config.port, () => {
+    console.log(`Server is running on port ${config.port}`);
 });
 
 app.get('/', (req, res) => {

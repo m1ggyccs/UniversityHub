@@ -5,6 +5,7 @@ const { body, validationResult } = require('express-validator');
 const User = require('../models/User');
 const { auth } = require('../middleware/auth');
 const mongoose = require('mongoose');
+const config = require('../config');
 
 // Register new user
 router.post('/register', [
@@ -58,7 +59,7 @@ router.post('/register', [
         // Generate JWT token
         const token = jwt.sign(
             { userId: user._id },
-            process.env.JWT_SECRET,
+            config.jwtSecret,
             { expiresIn: '24h' }
         );
 
@@ -108,7 +109,7 @@ router.post('/login', [
         // Generate JWT token
         const token = jwt.sign(
             { userId: user._id },
-            process.env.JWT_SECRET,
+            config.jwtSecret,
             { expiresIn: '24h' }
         );
 
