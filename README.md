@@ -1,6 +1,6 @@
 <!-- Logo -->
 <p align="center">
-  <img src="university-hub-logo.png" alt="University Hub Logo" width="200"/>
+  <img src="assets/images/university-hub-logo.png" alt="University Hub Logo" width="200"/>
 </p>
 
 # University Hub
